@@ -1,0 +1,37 @@
+name: AstroMarket daily
+on:
+  schedule:
+    - cron: '30 2 * * 1-5'    # 08:00 IST / 06:30 Dubai — log today's predictions before the 09:15 IST open
+    - cron: '30 14 * * 1-5'   # 20:00 IST / 18:30 Dubai — settle against the day's closing prices
+    - cron: '0 3 * * 0'       # Sunday — rebuild the 12-month Excel workbook
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'morning | evening | weekly | all'
+        default: 'all'
+permissions:
+  contents: write
+concurrency: { group: astro-daily, cancel-in-progress: false }
+jobs:
+  run:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12', cache: pip }
+      - run: pip install -r requirements.txt
+      - name: Pick mode
+        id: m
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then echo "mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.schedule }}" = "30 2 * * 1-5" ]; then echo "mode=morning" >> $GITHUB_OUTPUT
+          elif [ "${{ github.event.schedule }}" = "30 14 * * 1-5" ]; then echo "mode=evening" >> $GITHUB_OUTPUT
+          else echo "mode=weekly" >> $GITHUB_OUTPUT; fi
+      - run: python daily_job.py ${{ steps.m.outputs.mode }}
+      - name: Commit results
+        run: |
+          git config user.name "astro-bot"; git config user.email "actions@users.noreply.github.com"
+          git add data/tracker AstroMarket_Workbook.xlsx || true
+          git diff --cached --quiet || git commit -m "AstroMarket ${{ steps.m.outputs.mode }} $(TZ=Asia/Kolkata date +%F)"
+          git pull --rebase --autostash && git push

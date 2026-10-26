@@ -1,0 +1,595 @@
+{
+ "generated": "2026-10-24T23:28:44+00:00",
+ "matrix": [
+  {
+   "ayanamsa": "Lahiri",
+   "node": "true",
+   "hard_pass": 36,
+   "hard_total": 36,
+   "soft_pass": 3,
+   "soft_total": 5
+  },
+  {
+   "ayanamsa": "Lahiri",
+   "node": "mean",
+   "hard_pass": 34,
+   "hard_total": 36,
+   "soft_pass": 3,
+   "soft_total": 5
+  },
+  {
+   "ayanamsa": "Raman",
+   "node": "true",
+   "hard_pass": 29,
+   "hard_total": 36,
+   "soft_pass": 3,
+   "soft_total": 5
+  },
+  {
+   "ayanamsa": "Raman",
+   "node": "mean",
+   "hard_pass": 28,
+   "hard_total": 36,
+   "soft_pass": 3,
+   "soft_total": 5
+  },
+  {
+   "ayanamsa": "Krishnamurti",
+   "node": "true",
+   "hard_pass": 34,
+   "hard_total": 36,
+   "soft_pass": 3,
+   "soft_total": 5
+  },
+  {
+   "ayanamsa": "Krishnamurti",
+   "node": "mean",
+   "hard_pass": 34,
+   "hard_total": 36,
+   "soft_pass": 3,
+   "soft_total": 5
+  },
+  {
+   "ayanamsa": "Fagan-Bradley",
+   "node": "true",
+   "hard_pass": 30,
+   "hard_total": 36,
+   "soft_pass": 3,
+   "soft_total": 5
+  },
+  {
+   "ayanamsa": "Fagan-Bradley",
+   "node": "mean",
+   "hard_pass": 28,
+   "hard_total": 36,
+   "soft_pass": 3,
+   "soft_total": 5
+  },
+  {
+   "ayanamsa": "Tropical",
+   "node": "true",
+   "hard_pass": 11,
+   "hard_total": 36,
+   "soft_pass": 2,
+   "soft_total": 5
+  },
+  {
+   "ayanamsa": "Tropical",
+   "node": "mean",
+   "hard_pass": 10,
+   "hard_total": 36,
+   "soft_pass": 2,
+   "soft_total": 5
+  }
+ ],
+ "chosen": {
+  "ayanamsa": "Lahiri",
+  "node": "true",
+  "hard_pass": 36,
+  "hard_total": 36,
+  "soft_pass": 3,
+  "soft_total": 5
+ },
+ "tests": [
+  {
+   "id": "T01",
+   "group": "Position",
+   "test": "Candra 12-Mar-2009 09:55 IST",
+   "book": "Kanyā 11°32′",
+   "engine": "Kanyā 11°32′",
+   "pass_": true,
+   "page": 61,
+   "hard": true
+  },
+  {
+   "id": "T02",
+   "group": "Nakṣatra",
+   "test": "Candra nakṣatra 29-Sep-2009 trading hours",
+   "book": "Śravaṇa",
+   "engine": "Śravaṇa",
+   "pass_": true,
+   "page": 45,
+   "hard": true
+  },
+  {
+   "id": "T03",
+   "group": "Nakṣatra",
+   "test": "Candra nakṣatra 30-Sep-2009 trading hours",
+   "book": "Dhaniṣṭhā",
+   "engine": "Dhaniṣṭhā",
+   "pass_": true,
+   "page": 45,
+   "hard": true
+  },
+  {
+   "id": "T04",
+   "group": "Position",
+   "test": "Śani 10-Jan-2008",
+   "book": "Siṃha 14°10′ (R)",
+   "engine": "Siṃha 14°10′ R",
+   "pass_": true,
+   "page": 83,
+   "hard": true
+  },
+  {
+   "id": "T05",
+   "group": "Position",
+   "test": "Guru 10-Jan-2008",
+   "book": "Dhanus 11°10′",
+   "engine": "Dhanus 11°09′",
+   "pass_": true,
+   "page": 83,
+   "hard": true
+  },
+  {
+   "id": "T06",
+   "group": "Aspect",
+   "test": "Guru–Śani exact trine 21-Jan-2008 at 13°37′",
+   "book": "Guru 13°37′ Dhanus / Śani 13°37′ Siṃha",
+   "engine": "Dhanus 13°38′ / Siṃha 13°38′",
+   "pass_": true,
+   "page": 83,
+   "hard": true
+  },
+  {
+   "id": "T07",
+   "group": "Aspect",
+   "test": "Guru→Śani aspect window #1 (3° orb)",
+   "book": "10-Jan-2008 → 01-Feb-2008",
+   "engine": "2008-01-11 → 2008-01-31",
+   "pass_": true,
+   "page": 83,
+   "hard": true
+  },
+  {
+   "id": "T08",
+   "group": "Aspect",
+   "test": "Guru→Śani aspect window #2 (3° orb)",
+   "book": "21-Aug-2008 → 11-Dec-2008",
+   "engine": "2008-08-21 → 2008-12-11",
+   "pass_": true,
+   "page": 83,
+   "hard": true
+  },
+  {
+   "id": "T09",
+   "group": "Motion",
+   "test": "Guru retrograde & Śani direct on 21-Aug-2008",
+   "book": "Guru R, Śani D",
+   "engine": "Guru R, Śani D",
+   "pass_": true,
+   "page": 83,
+   "hard": true
+  },
+  {
+   "id": "T10",
+   "group": "Business cycle",
+   "test": "Śani/Guru rāśis 1921",
+   "book": "Śani Siṃha, Guru Siṃha",
+   "engine": "present",
+   "pass_": true,
+   "page": 85,
+   "hard": true
+  },
+  {
+   "id": "T11",
+   "group": "Business cycle",
+   "test": "Śani/Guru rāśis 1930",
+   "book": "Śani Dhanus, Guru Mithuna",
+   "engine": "present",
+   "pass_": true,
+   "page": 85,
+   "hard": true
+  },
+  {
+   "id": "T12",
+   "group": "Business cycle",
+   "test": "Śani/Guru rāśis 1940",
+   "book": "Śani Meṣa, Guru Meṣa",
+   "engine": "present",
+   "pass_": true,
+   "page": 85,
+   "hard": true
+  },
+  {
+   "id": "T13",
+   "group": "Business cycle",
+   "test": "Śani/Guru rāśis 1978",
+   "book": "Śani Siṃha, Guru Mithuna",
+   "engine": "present",
+   "pass_": true,
+   "page": 85,
+   "hard": true
+  },
+  {
+   "id": "T14",
+   "group": "Business cycle",
+   "test": "Śani/Guru rāśis 1979",
+   "book": "Śani Siṃha, Guru Siṃha",
+   "engine": "present",
+   "pass_": true,
+   "page": 85,
+   "hard": true
+  },
+  {
+   "id": "T15",
+   "group": "Business cycle",
+   "test": "Śani/Guru rāśis 1990",
+   "book": "Śani Dhanus, Guru Mithuna",
+   "engine": "present",
+   "pass_": true,
+   "page": 85,
+   "hard": true
+  },
+  {
+   "id": "T16",
+   "group": "Business cycle",
+   "test": "Śani/Guru rāśis 2008",
+   "book": "Śani Siṃha, Guru Dhanus",
+   "engine": "present",
+   "pass_": true,
+   "page": 85,
+   "hard": true
+  },
+  {
+   "id": "T17",
+   "group": "Business cycle",
+   "test": "Śani/Guru rāśis 2017-2018",
+   "book": "Śani Dhanus, Guru Tulā",
+   "engine": "present",
+   "pass_": true,
+   "page": 85,
+   "hard": true
+  },
+  {
+   "id": "T18",
+   "group": "Business cycle",
+   "test": "Śani/Guru rāśis 2028-2029",
+   "book": "Śani Meṣa, Guru Siṃha; Śani Meṣa, Guru Tulā",
+   "engine": "present",
+   "pass_": true,
+   "page": 85,
+   "hard": true
+  },
+  {
+   "id": "T19",
+   "group": "Business cycle",
+   "test": "Śani/Guru rāśis 2036-2038",
+   "book": "Śani Siṃha, Guru Mithuna",
+   "engine": "present",
+   "pass_": true,
+   "page": 85,
+   "hard": true
+  },
+  {
+   "id": "T20",
+   "group": "Business cycle",
+   "test": "Śani/Guru rāśis 2047-2048",
+   "book": "Śani Dhanus, Guru Meṣa; Śani Dhanus, Guru Mithuna",
+   "engine": "present",
+   "pass_": true,
+   "page": 85,
+   "hard": true
+  },
+  {
+   "id": "T21",
+   "group": "Business cycle",
+   "test": "Śani/Guru rāśis 2058-2059",
+   "book": "Śani Meṣa, Guru Meṣa",
+   "engine": "present",
+   "pass_": true,
+   "page": 85,
+   "hard": true
+  },
+  {
+   "id": "T22",
+   "group": "Ingress",
+   "test": "Śani enters Meṣa",
+   "book": "1998 (market collapse May 1998)",
+   "engine": "17-Apr-1998",
+   "pass_": true,
+   "page": 84,
+   "hard": true
+  },
+  {
+   "id": "T23",
+   "group": "Aspect",
+   "test": "Śani–Guru conjunction 2000",
+   "book": "Meṣa, Apr–Aug 2000",
+   "engine": "20-May-2000 Meṣa",
+   "pass_": true,
+   "page": 84,
+   "hard": false
+  },
+  {
+   "id": "T24",
+   "group": "Crude",
+   "test": "Śani with Ketu in Siṃha, Jul 2007",
+   "book": "Śani & Ketu in Siṃha",
+   "engine": "Śani Siṃha, Ketu Siṃha",
+   "pass_": true,
+   "page": 89,
+   "hard": true
+  },
+  {
+   "id": "T25",
+   "group": "Crude",
+   "test": "Ketu leaves Siṃha",
+   "book": "May 2008",
+   "engine": "05-May-2008",
+   "pass_": true,
+   "page": 89,
+   "hard": true
+  },
+  {
+   "id": "T26",
+   "group": "Crude",
+   "test": "Śani with Rāhu in Vṛṣabha (conjunction inside window)",
+   "book": "Mar-2002 → Mar-2003",
+   "engine": "both in Vṛṣabha at window ends; closest 0.0°",
+   "pass_": true,
+   "page": 90,
+   "hard": true
+  },
+  {
+   "id": "T27",
+   "group": "Crude",
+   "test": "Śani with Rāhu in Tulā; Rāhu leaves",
+   "book": "Jan-2013 → Jul-2014",
+   "engine": "together; Rāhu leaves 13-Jul-2014",
+   "pass_": true,
+   "page": 90,
+   "hard": true
+  },
+  {
+   "id": "T28",
+   "group": "Gold",
+   "test": "Guru & Rāhu \"came within 30°\" May–Jun 2008",
+   "book": "≤ 30°",
+   "engine": "min 29.5°",
+   "pass_": true,
+   "page": 87,
+   "hard": true
+  },
+  {
+   "id": "T29",
+   "group": "Gold",
+   "test": "Guru–Rāhu exact conjunction Feb 2009",
+   "book": "≈0° in Feb-2009",
+   "engine": "0.07° on 14-Feb",
+   "pass_": true,
+   "page": 87,
+   "hard": true
+  },
+  {
+   "id": "T30",
+   "group": "Gold",
+   "test": "Guru moves Makara → Kumbha",
+   "book": "end Dec 2009",
+   "engine": "19-Dec-2009",
+   "pass_": true,
+   "page": 87,
+   "hard": true
+  },
+  {
+   "id": "T31",
+   "group": "Gold",
+   "test": "Rāhu moves Makara → Dhanus",
+   "book": "\"during end of Dec 2009\" (approximate)",
+   "engine": "02-Nov-2009",
+   "pass_": true,
+   "page": 87,
+   "hard": false
+  },
+  {
+   "id": "T32",
+   "group": "Gold",
+   "test": "Guru conj node 06-1893",
+   "book": "conjunction in Meṣa",
+   "engine": "21.8°, Guru in Meṣa",
+   "pass_": true,
+   "page": 88,
+   "hard": true
+  },
+  {
+   "id": "T33",
+   "group": "Gold",
+   "test": "Guru conj node 11-1979",
+   "book": "conjunction in Siṃha",
+   "engine": "2.2°, Guru in Siṃha",
+   "pass_": true,
+   "page": 88,
+   "hard": true
+  },
+  {
+   "id": "T34",
+   "group": "Gold",
+   "test": "Guru conj node 03-1980",
+   "book": "conjunction in Siṃha",
+   "engine": "3.7°, Guru in Siṃha",
+   "pass_": true,
+   "page": 88,
+   "hard": true
+  },
+  {
+   "id": "T35",
+   "group": "Gold",
+   "test": "Guru conj node 02-1987",
+   "book": "conjunction in Mīna",
+   "engine": "15.9°, Guru in Mīna",
+   "pass_": true,
+   "page": 88,
+   "hard": true
+  },
+  {
+   "id": "T36",
+   "group": "Gold",
+   "test": "Guru conj Ketu in Kanyā, 1838",
+   "book": "Kanyā",
+   "engine": "6.7°, Guru Kanyā, Ketu Kanyā",
+   "pass_": true,
+   "page": 88,
+   "hard": true
+  },
+  {
+   "id": "T37",
+   "group": "Gold",
+   "test": "Guru conj node 31-May-1781",
+   "book": "conjunction",
+   "engine": "16.4°",
+   "pass_": true,
+   "page": 88,
+   "hard": false
+  },
+  {
+   "id": "T38",
+   "group": "Gold",
+   "test": "Guru conj Ketu in Vṛṣabha 1948",
+   "book": "Vṛṣabha",
+   "engine": "Guru Dhanus, Ketu Tulā (41°)",
+   "pass_": false,
+   "page": 88,
+   "hard": false,
+   "note": "Book error: in 1948 Guru was in Vṛścika/Dhanus under every ayanāṃśa (tropical included); cannot be reproduced."
+  },
+  {
+   "id": "T39",
+   "group": "Daśā",
+   "test": "Micro-viṃśottarī schedule 12-Mar-2009",
+   "book": "Ca→10:30:24, Ma→10:58:24 … Ke→16:06:24",
+   "engine": "Mo 10:30:23, Ma 10:58:23, Ra 12:10:23, Ju 13:14:23, Sa 14:30:23, Me 15:38:23, Ke 16:06:23",
+   "pass_": true,
+   "page": 62,
+   "hard": true
+  },
+  {
+   "id": "T40",
+   "group": "Horā",
+   "test": "Horā lords at book times (29/30-Sep-2009)",
+   "book": "Su 13:52, Mo 09:52, Ma 12:52, Ju 11:52, Ve 14:52, Sa 10:52 | Wed Mo 13:52, Me 12:52",
+   "engine": "Su 13:52, Mo 09:52, Ma 12:52, Ju 11:52, Ve 14:52, Sa 10:52, Mo 13:52, Me 12:52",
+   "pass_": true,
+   "page": 54,
+   "hard": true
+  },
+  {
+   "id": "T41",
+   "group": "Horā",
+   "test": "Sunrise 29-Sep-2009 used in examples",
+   "book": "05:52",
+   "engine": "Lucknow 05:58, Mumbai 06:29",
+   "pass_": false,
+   "page": 54,
+   "hard": false
+  }
+ ],
+ "aspect_fit": {
+  "rows": [
+   {
+    "date": "29-09-2009",
+    "graha": "Candra",
+    "book": "Guru, Maṅgala, Rāhu, Sūrya",
+    "engine": "Guru, Ketu, Maṅgala, Rāhu, Sūrya",
+    "extra": "Ketu",
+    "missed": ""
+   },
+   {
+    "date": "29-09-2009",
+    "graha": "Sūrya",
+    "book": "Guru, Maṅgala, Candra, Rāhu",
+    "engine": "Guru, Maṅgala, Candra, Rāhu, Śani",
+    "extra": "Śani",
+    "missed": ""
+   },
+   {
+    "date": "29-09-2009",
+    "graha": "Maṅgala",
+    "book": "Śani",
+    "engine": "Śani",
+    "extra": "",
+    "missed": ""
+   },
+   {
+    "date": "29-09-2009",
+    "graha": "Guru",
+    "book": "Ketu, Maṅgala, Candra, Rāhu",
+    "engine": "Ketu, Maṅgala, Candra, Rāhu, Sūrya",
+    "extra": "Sūrya",
+    "missed": ""
+   },
+   {
+    "date": "29-09-2009",
+    "graha": "Śukra",
+    "book": "Budha",
+    "engine": "Budha",
+    "extra": "",
+    "missed": ""
+   },
+   {
+    "date": "29-09-2009",
+    "graha": "Śani",
+    "book": "Guru, Maṅgala, Candra, Sūrya",
+    "engine": "Guru, Maṅgala, Rāhu, Sūrya",
+    "extra": "Rāhu",
+    "missed": "Candra"
+   },
+   {
+    "date": "30-09-2009",
+    "graha": "Maṅgala",
+    "book": "Śani",
+    "engine": "Śani",
+    "extra": "",
+    "missed": ""
+   },
+   {
+    "date": "30-09-2009",
+    "graha": "Candra",
+    "book": "Guru, Maṅgala, Rāhu, Sūrya",
+    "engine": "Guru, Ketu, Maṅgala, Rāhu, Sūrya",
+    "extra": "Ketu",
+    "missed": ""
+   },
+   {
+    "date": "30-09-2009",
+    "graha": "Budha",
+    "book": "Śukra",
+    "engine": "Rāhu, Śukra",
+    "extra": "Rāhu",
+    "missed": ""
+   }
+  ],
+  "recall": 0.9583333333333334,
+  "precision": 0.7931034482758621,
+  "tp": 23,
+  "fp": 6,
+  "fn": 1,
+  "minimum_possible_errors": 5,
+  "contradictions": [
+   "29-Sep: Sūrya–Śani are conjunct in Kanyā; the book lists Sūrya among Śani's aspects but omits Śani from Sūrya's list.",
+   "29-Sep: Rāhu (Makara) aspects Kanyā by its 9th dṛṣṭi; the book lists Rāhu on Sūrya (Kanyā) but not on Śani (also Kanyā).",
+   "29/30-Sep: Ketu (Karkaṭa) aspects Makara by 7th dṛṣṭi; the book lists Ketu on Guru (Makara) but not on Candra (also Makara).",
+   "29-Sep: Candra–Śani trine is listed for Śani but not for Candra (a trine is mutual)."
+  ]
+ },
+ "swisseph_version": "2.10.03"
+}

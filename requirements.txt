@@ -1,0 +1,9 @@
+pyswisseph>=2.10
+pandas>=2.2
+numpy
+pyarrow
+openpyxl
+streamlit>=1.40
+plotly>=5
+yfinance
+scipy
