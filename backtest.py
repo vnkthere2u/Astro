@@ -4,7 +4,7 @@ calibration table that supplies the 'confidence %' shown next to every predictio
 
 Astrological inputs are deterministic functions of the calendar, so there is no look-ahead
 bias: the score for day t uses only the sky on day t.  Returns are measured from the open of
-day t (or prior close where no open exists): intraday = open→close, short = 5 sessions, long = 63 sessions.
+day t (or prior close where no open exists): intraday = open→close, short = 5 sessions, long = 40 sessions.
 
 Outputs (data/):
   score_history.parquet  — date × target × horizon composite scores
@@ -60,6 +60,13 @@ def compute_history(start: date, end: date, local_dir=None, progress=True):
     S['date'] = pd.to_datetime(S['date']); F['date'] = pd.to_datetime(F['date'])
     return S, F
 
+def smooth(S: pd.DataFrame) -> pd.DataFrame:
+    """Apply the same forward averaging the app shows (E.SMOOTH sessions) to raw daily scores."""
+    S = S.sort_values(['target', 'date']).copy()
+    for hz, n in E.SMOOTH.items():
+        S[hz] = S.groupby('target')[hz].transform(lambda x: x[::-1].rolling(n, min_periods=1).mean()[::-1])
+    return S
+
 def calibrate(S: pd.DataFrame, F: pd.DataFrame, local_dir=None):
     out = dict(targets={}, family={}, overall={}, meta=dict(threshold=E.THRESH, buckets=BUCKETS, split=str(SPLIT.date())))
     R = {}
@@ -98,7 +105,7 @@ def calibrate(S: pd.DataFrame, F: pd.DataFrame, local_dir=None):
             for nm, msk in (('in_sample', sc.index < SPLIT), ('out_of_sample', sc.index >= SPLIT)):
                 c2 = call & msk; k3, n3 = int(hit[c2].sum()), int(c2.sum()); p3, l3, h3 = wilson(k3, n3)
                 H[nm] = dict(n=n3, hits=k3, hit=p3, lo=l3, hi=h3)
-            if hz == 'long': H['effective_n_note'] = 'overlapping 63-session windows: effective independent n ≈ n/63'
+            if hz == 'long': H['effective_n_note'] = 'overlapping 40-session windows: effective independent n ≈ n/40'
             if hz == 'short': H['effective_n_note'] = 'overlapping 5-session windows: effective independent n ≈ n/5'
             info['horizons'][hz] = H
             tmp = pd.DataFrame({'date': sc.index, 'target': tgt, 'hz': hz, 'score': sc.values, 'ret': rt.values, 'quality': meta['quality']})
@@ -206,14 +213,15 @@ def main(start=date(2012, 2, 21), end=None, local_dir=None):
     end = end or date.today()
     t0 = _t.time()
     print('scoring history …')
-    S, F = compute_history(start, end, local_dir)
+    S, F = compute_history(start, end + timedelta(days=90), local_dir)
+    S = smooth(S); S = S[S.date <= pd.Timestamp(end)]; F = F[F.date <= pd.Timestamp(end)]
     S.to_parquet(DATA / 'score_history.parquet'); F.to_parquet(DATA / 'family_history.parquet')
     print(f'  done {len(S)} rows in {_t.time() - t0:.0f}s; calibrating …')
     cal, A = calibrate(S, F, local_dir)
     A.to_parquet(DATA / 'backtest_joined.parquet')
     print('long-run cycle tests …')
     cal['longrun'] = longrun_tests()
-    cal['meta']['generated'] = datetime.utcnow().isoformat(timespec='seconds')
+    cal['meta']['generated'] = datetime.now().isoformat(timespec='seconds')
     cal['meta']['period'] = f'{start} → {end}'
     (DATA / 'calibration.json').write_text(json.dumps(cal, indent=1, default=lambda x: None if (isinstance(x, float) and math.isnan(x)) else str(x)))
     print(f'finished in {_t.time() - t0:.0f}s')

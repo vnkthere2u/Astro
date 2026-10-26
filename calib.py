@@ -30,23 +30,38 @@ def bucket(s):
     return None
 E_BUCKETS = [(0.15, 0.30, 'weak'), (0.30, 0.50, 'moderate'), (0.50, 1.01, 'strong')]
 
+WINDOW = {'intraday': 1, 'short': 5, 'long': 40}   # overlapping windows → independent observations ≈ n / window
+QUALITY_OK = {'direct', 'proxy'}
+
+def tier_of(p, naive, n_eff):
+    """High / Medium = historically beat both a coin-flip and the 'always predict the usual direction' benchmark
+    on enough independent occurrences. Everything else is information only."""
+    if n_eff < 30 or p is None: return 'Unproven'
+    if p >= 0.58 and p >= (naive or 0.5) + 0.03: return 'High'
+    if p >= 0.53 and p >= (naive or 0.5): return 'Medium'
+    return 'Low'
+
 def confidence(target: str, hz: str, score: float) -> dict | None:
-    """Shrunk empirical hit-rate of calls like this one (same target, horizon, strength bucket)."""
+    """Historical hit-rate of calls like this one (same target, horizon, direction-strength bucket), shrunk toward 50%."""
     c = cal()
     if not c or abs(score) <= E.THRESH: return None
     b = bucket(score)
-    t = c.get('targets', {}).get(target, {}).get('horizons', {}).get(hz)
-    src = 'target'
+    info = c.get('targets', {}).get(target, {})
+    t = info.get('horizons', {}).get(hz)
+    quality = info.get('meta', {}).get('quality')
     if t and t['buckets'].get(b, {}).get('n', 0) >= 30:
-        k, n = t['buckets'][b]['hits'], t['buckets'][b]['n']; naive = t['all'].get('naive_hit')
+        k, n = t['buckets'][b]['hits'], t['buckets'][b]['n']; naive = t['all'].get('naive_hit'); src = 'target'
     else:
         o = c.get('overall', {}).get(f'{hz}|all|{b}')
         if not o: return None
         k, n = o['hits'], o['n']; naive = None; src = 'pooled'
     p = (k + PRIOR_N / 2) / (n + PRIOR_N)
-    z = 1.96; ph = k / n if n else 0.5
-    d = 1 + z * z / n; cc = (ph + z * z / (2 * n)) / d; h = z * math.sqrt(ph * (1 - ph) / n + z * z / (4 * n * n)) / d
-    return dict(p=round(p, 3), raw=round(ph, 3), lo=round(cc - h, 3), hi=round(cc + h, 3), n=n, bucket=b, naive=naive, source=src)
+    n_eff = n / WINDOW[hz]
+    tier = tier_of(p, naive, n_eff) if (src == 'target' and quality in QUALITY_OK) else ('Unproven' if src == 'pooled' else 'Low')
+    return dict(p=round(p, 3), raw=round(k / n, 3), n=n, n_eff=round(n_eff), bucket=b, naive=naive, source=src, tier=tier, quality=quality)
+
+def actionable(cf) -> bool:
+    return bool(cf) and cf['tier'] in ('High', 'Medium')
 
 def expected_move(target: str, hz: str, score: float) -> dict | None:
     """Historical distribution of returns on days with a call in the same bucket & direction."""

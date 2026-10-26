@@ -139,7 +139,7 @@ def cross_check(target: str, days=60) -> dict | None:
     return dict(target=target, status='ok' if dev.max() < 0.005 else 'DISCREPANCY', max_abs_dev_pct=round(100 * dev.max(), 3),
                 mean_abs_dev_pct=round(100 * dev.mean(), 4), days=len(j))
 
-def returns_frame(target: str, horizons=(('intraday', 0), ('short', 5), ('long', 63)), refresh=False, local_dir=None):
+def returns_frame(target: str, horizons=(('intraday', 0), ('short', 5), ('long', 40)), refresh=False, local_dir=None):
     df, meta = series_for(target, refresh, local_dir)
     if df is None: return None, None
     df = df.copy()

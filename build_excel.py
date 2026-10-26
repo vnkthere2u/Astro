@@ -50,16 +50,16 @@ def widths(ws, w: dict):
 def build(start: date, ndays=365, out=None):
     eng = E.Engine(muhurat=[(date(2023, 11, 12), 354), (date(2024, 11, 1), 335), (date(2025, 10, 21), 63)])
     days = [start + timedelta(days=i) for i in range(ndays)]
-    res = {d: eng.day(d) for d in days}
+    res = {d: eng.view(d) for d in days}
     TG = ['NIFTY'] + E.SECTORS + E.COMMODITIES
     wb = Workbook()
 
     # ------------------------------------------------------------ Settings
     st = wb.active; st.title = 'Settings'
     title(st, 'Settings & legend', 'Yellow cells are inputs. Change them and every call, colour and tracker statistic in the workbook updates.')
-    rows = [('Green / Red threshold (|score| above which a call is UP / DOWN)', E.THRESH, 'Engine default 0.15. Scores run −1 … +1.'),
-            ('Daily composite weight — intraday', 0.5, 'Composite = w_i·intraday + w_s·short + w_l·long (pre-computed in Daily_Composite with these defaults).'),
-            ('Daily composite weight — short-term', 0.3, ''), ('Daily composite weight — long-term', 0.2, ''),
+    rows = [('Green / Red threshold (|score| above which a call is Bullish / Bearish)', E.THRESH, 'Engine default 0.15. Scores run −1 … +1.'),
+            ('Overall-view weight — today', 0.5, 'Overall = w·today + w·next week + w·next 2 months (pre-computed in Daily_Composite with these defaults).'),
+            ('Overall-view weight — next week', 0.3, ''), ('Overall-view weight — next 2 months', 0.2, ''),
             ('Workbook generated', datetime.now().strftime('%Y-%m-%d %H:%M'), 'Re-run build_excel.py to roll forward.'),
             ('Market location / opening bell', f"{eng.exchange} {eng.open_t:%H:%M}", 'Opening-bell chart & horā computed for this place.')]
     header(st, 3, ['', 'Parameter', 'Value', 'Note'])
@@ -69,12 +69,12 @@ def build(start: date, ndays=365, out=None):
         if i < 4: x.fill = YEL
         st.cell(row=4 + i, column=4, value=c).font = SMALL
     st['B12'] = 'Legend'; st['B12'].font = BB
-    for i, (f, t) in enumerate([(G_F, 'UP / bullish call (score > threshold)'), (A_F, 'NEUTRAL (|score| ≤ threshold)'), (R_F, 'DOWN / bearish call (score < −threshold)'),
+    for i, (f, t) in enumerate([(G_F, 'Bullish (score > threshold)'), (A_F, 'Neutral (|score| ≤ threshold)'), (R_F, 'Bearish (score < −threshold)'),
                                 (YEL, 'Input cell (blue text) — edit me')]):
         st.cell(row=13 + i, column=2).fill = f; st.cell(row=13 + i, column=3, value=t).font = B
     st['B18'] = 'Important'; st['B18'].font = BB
-    st['B19'] = ('Backtest 2012-02-21 → 2026-10-23 on NSE indices: intraday directional hit-rate 50.5% (95% CI 50.0–51.0%), short-term 50.0%, '
-                 'long-term 47.1% vs ~60% for a naive "always up" call. Treat outputs as an implementation of the book, not as a validated trading signal.')
+    st['B19'] = ('Backtest 2012-02-21 → 2026-10-23 on NSE indices: intraday directional hit-rate 50.5% (95% CI 50.0–51.0%), short-term 50.5%, '
+                 'long-term 46.1% vs ~60% for a naive "always up" call. Treat outputs as an implementation of the book, not as a validated trading signal.')
     st['B19'].alignment = WRAP; st['B19'].font = B; st.merge_cells('B19:D22')
     widths(st, {'A': 2, 'B': 62, 'C': 26, 'D': 80})
 
@@ -82,7 +82,7 @@ def build(start: date, ndays=365, out=None):
     db = wb.create_sheet('Dashboard', 0)
     d0 = E.is_trading_day(start) and start or next(d for d in days if d.weekday() < 5)
     r0 = res[d0]
-    title(db, f'AstroMarket Dashboard — first trading day {d0:%A %d %b %Y}', 'Banerjee, Stock Market Astrology (2009) · Swiss Ephemeris · sidereal Lahiri · true node')
+    title(db, f'AstroMarket Dashboard — first trading day {d0:%A %d %b %Y}', 'Today = that session · Short = next 5 sessions (averaged) · Long = next 40 sessions (averaged)')
     db['A4'] = 'Sky'; db['A4'].font = BB
     cm = r0.chart_mid
     db['B4'] = f"Candra {ac.fmt_deg(cm['Mo'].lon)} · {ac.NAK[cm.moon_nak]} · opening lagna {ac.fmt_deg(r0.chart_open.asc)}"
@@ -97,12 +97,12 @@ def build(start: date, ndays=365, out=None):
             cf = C.confidence(t, hz, r0.scores[t][hz])
             x = db.cell(row=rr, column=7 + j, value=cf['p'] if cf else None); x.number_format = '0%'; x.font = B
         db.cell(row=rr, column=5, value=f'=Settings!$C$5*B{rr}+Settings!$C$6*C{rr}+Settings!$C$7*D{rr}').font = B
-        db.cell(row=rr, column=6, value=f'=IF(E{rr}>{THR},"UP",IF(E{rr}<-{THR},"DOWN","NEUTRAL"))').font = BB
+        db.cell(row=rr, column=6, value=f'=IF(E{rr}>{THR},"Bullish",IF(E{rr}<-{THR},"Bearish","Neutral"))').font = BB
         for c in range(2, 6): db.cell(row=rr, column=c).number_format = '+0.00;-0.00;0.00'
     last = 8 + len(TG)
     rag_cf(db, f'B9:E{last}', light=True)
-    db.conditional_formatting.add(f'F9:F{last}', CellIsRule(operator='equal', formula=['"UP"'], fill=G_L))
-    db.conditional_formatting.add(f'F9:F{last}', CellIsRule(operator='equal', formula=['"DOWN"'], fill=R_L))
+    db.conditional_formatting.add(f'F9:F{last}', CellIsRule(operator='equal', formula=['"Bullish"'], fill=G_L))
+    db.conditional_formatting.add(f'F9:F{last}', CellIsRule(operator='equal', formula=['"Bearish"'], fill=R_L))
     plan = E.action_plan(r0, C.confidence)
     rr = last + 2; db.cell(row=rr, column=1, value='Intraday timing (horā, Ch.10)').font = BB
     for k, w in enumerate(plan['hora_windows']): db.cell(row=rr + 1 + k, column=1, value=w).font = B
@@ -151,7 +151,7 @@ def build(start: date, ndays=365, out=None):
 
     # ------------------------------------------------------------ Grid_12M (day boxes)
     gr = wb.create_sheet('Grid_12M', 2)
-    title(gr, 'Day-box grid — 12 months × all sectors & commodities (daily composite)', 'Each box links to Daily_Composite; green = UP, amber = NEUTRAL, red = DOWN. Weekend columns shaded headers.')
+    title(gr, 'Day-box grid — 12 months × all sectors & commodities (daily composite)', 'Each box links to Daily_Composite; green = Bullish, amber = Neutral, red = Bearish. Weekend columns shaded headers.')
     gr.cell(row=4, column=1, value='Target').font = BB
     for j, d in enumerate(days):
         col = 2 + j
@@ -171,13 +171,13 @@ def build(start: date, ndays=365, out=None):
 
     # ------------------------------------------------------------ Monthly_Summary (formulas)
     ms = wb.create_sheet('Monthly_Summary', 3)
-    title(ms, 'Monthly summary (formulas over Daily_Composite, trading days only)', 'Avg score, % of trading days UP, % DOWN, and the resulting monthly call.')
+    title(ms, 'Monthly summary (formulas over Daily_Composite, trading days only)', 'Avg score, % of trading days Bullish, % Bearish, and the resulting monthly call.')
     months = []
     m = start.replace(day=1)
     while m <= days[-1]:
         months.append(m); m = (m + timedelta(days=32)).replace(day=1)
     hdr = ['Target']
-    for m in months: hdr += [f'{m:%b-%y} avg', '% up', '% down']
+    for m in months: hdr += [f'{m:%b-%y} avg', '% Bullish', '% Bearish']
     header(ms, 4, hdr)
     ms.cell(row=3, column=1, value='Month start').font = SMALL
     for k, m in enumerate(months):
@@ -265,7 +265,7 @@ def build(start: date, ndays=365, out=None):
     # ------------------------------------------------------------ Tracker (formulas)
     tr = wb.create_sheet('Tracker', 4)
     title(tr, 'Prediction tracker — predicted vs actual', 'Enter the realised % move (as a fraction, e.g. 0.012 = +1.2%) in the yellow column. Calls, hits and accuracy are formulas.')
-    tr['A3'] = 'Example: NIFTY intraday predicted −0.42 (DOWN); actual open→close −0.6% → enter −0.006 → Hit = 1.'; tr['A3'].font = SMALL
+    tr['A3'] = 'Example: Nifty intraday predicted −0.42 (Bearish); actual open→close −0.6% → enter −0.006 → Hit = 1.'; tr['A3'].font = SMALL
     header(tr, 5, ['Date', 'Target', 'Horizon', 'Predicted score', 'Predicted call', 'Confidence', 'Actual return', 'Actual direction', 'Hit (1/0)', 'Mode'])
     T = TR.load()
     keep = ['NIFTY', 'BANK', 'IT', 'AUTO', 'PHARMA', 'FMCG', 'METAL', 'REALTY', 'MEDIA', 'INFRA', 'PSU', 'GOLD', 'SILVER', 'CRUDE', 'NATGAS']
@@ -282,11 +282,11 @@ def build(start: date, ndays=365, out=None):
         tr.cell(row=rr, column=1, value=pd.Timestamp(x['date']).date()).number_format = 'dd-mmm-yy'
         tr.cell(row=rr, column=2, value=E.TARGET_NAME[x['target']]); tr.cell(row=rr, column=3, value=x['horizon'])
         tr.cell(row=rr, column=4, value=float(x['score'])).number_format = '+0.00;-0.00;0.00'
-        tr.cell(row=rr, column=5, value=f'=IF(D{rr}>{THR},"UP",IF(D{rr}<-{THR},"DOWN","NEUTRAL"))')
+        tr.cell(row=rr, column=5, value=f'=IF(D{rr}>{THR},"Bullish",IF(D{rr}<-{THR},"Bearish","Neutral"))')
         c6 = tr.cell(row=rr, column=6, value=None if pd.isna(x['confidence']) else float(x['confidence'])); c6.number_format = '0%'
         g = tr.cell(row=rr, column=7, value=None if pd.isna(x['actual_ret']) else float(x['actual_ret'])); g.number_format = '+0.00%;-0.00%;0.00%'; g.font = BLUE; g.fill = YEL
-        tr.cell(row=rr, column=8, value=f'=IF(G{rr}="","",IF(G{rr}>0,"UP",IF(G{rr}<0,"DOWN","FLAT")))')
-        tr.cell(row=rr, column=9, value=f'=IF(OR(G{rr}="",E{rr}="NEUTRAL"),"",IF(E{rr}=H{rr},1,0))')
+        tr.cell(row=rr, column=8, value=f'=IF(G{rr}="","",IF(G{rr}>0,"Bullish",IF(G{rr}<0,"Bearish","Flat")))')
+        tr.cell(row=rr, column=9, value=f'=IF(OR(G{rr}="",E{rr}="Neutral"),"",IF(E{rr}=H{rr},1,0))')
         tr.cell(row=rr, column=10, value=x['mode'])
         for c in range(1, 11):
             if c != 7: tr.cell(row=rr, column=c).font = B
@@ -298,9 +298,9 @@ def build(start: date, ndays=365, out=None):
     lines = [('All settled calls', f'=IFERROR(AVERAGE(I6:I{tl}),"")', f'=COUNT(I6:I{tl})'),
              ('Intraday', f'=IFERROR(AVERAGEIFS(I6:I{tl},C6:C{tl},"intraday"),"")', f'=COUNTIFS(C6:C{tl},"intraday",I6:I{tl},">=0")'),
              ('Short-term (5 sessions)', f'=IFERROR(AVERAGEIFS(I6:I{tl},C6:C{tl},"short"),"")', f'=COUNTIFS(C6:C{tl},"short",I6:I{tl},">=0")'),
-             ('UP calls', f'=IFERROR(AVERAGEIFS(I6:I{tl},E6:E{tl},"UP"),"")', f'=COUNTIFS(E6:E{tl},"UP",I6:I{tl},">=0")'),
-             ('DOWN calls', f'=IFERROR(AVERAGEIFS(I6:I{tl},E6:E{tl},"DOWN"),"")', f'=COUNTIFS(E6:E{tl},"DOWN",I6:I{tl},">=0")'),
-             ('Naive "always UP" on same rows', f'=IFERROR(COUNTIFS(H6:H{tl},"UP",I6:I{tl},">=0")/COUNT(I6:I{tl}),"")', '')]
+             ('Bullish calls', f'=IFERROR(AVERAGEIFS(I6:I{tl},E6:E{tl},"Bullish"),"")', f'=COUNTIFS(E6:E{tl},"Bullish",I6:I{tl},">=0")'),
+             ('Bearish calls', f'=IFERROR(AVERAGEIFS(I6:I{tl},E6:E{tl},"Bearish"),"")', f'=COUNTIFS(E6:E{tl},"Bearish",I6:I{tl},">=0")'),
+             ('Benchmark: always Bullish, same rows', f'=IFERROR(COUNTIFS(H6:H{tl},"Bullish",I6:I{tl},">=0")/COUNT(I6:I{tl}),"")', '')]
     header(tr, 6, ['Slice', 'Hit-rate', 'n'], start_col=12)
     for i, (a, b_, c) in enumerate(lines):
         tr.cell(row=7 + i, column=12, value=a).font = B
@@ -413,7 +413,7 @@ def build(start: date, ndays=365, out=None):
     bt = wb.create_sheet('Backtest'); cal = C.cal()
     title(bt, f"Backtest {cal['meta'].get('period')} — directional hit-rates (threshold ±{cal['meta']['threshold']})",
           'Hit = sign(score) equals sign(realised return). Naive = always predicting the majority direction on the same days.')
-    header(bt, 4, ['Target', 'Price series', 'Quality', 'Horizon', 'Calls (n)', 'Hit-rate', '95% low', '95% high', 'Naive', 'In-sample 2012-19', 'Out-of-sample 2020+', 'Avg ret UP calls', 'Avg ret DOWN calls'])
+    header(bt, 4, ['Target', 'Price series', 'Quality', 'Horizon', 'Calls (n)', 'Hit-rate', '95% low', '95% high', 'Naive', 'In-sample 2012-19', 'Out-of-sample 2020+', 'Avg ret Bullish calls', 'Avg ret Bearish calls'])
     rr = 5
     for t, info in cal['targets'].items():
         for hz, H in info['horizons'].items():

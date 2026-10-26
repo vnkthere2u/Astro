@@ -17,17 +17,35 @@ Every call is committed **before** the market opens, so the commit history is a 
 
 The app redeploys automatically whenever the Action commits. Treat it as read-only: its "Log" and "Settle" buttons write to the cloud container's temporary disk, which is wiped on restart. The Action is the system of record.
 
-## Your daily routine (≈5 minutes)
-1. **Morning, before 09:15 IST:**
-   - Open *Daily plan* and read the Nifty call per horizon and the regime note.
-   - Scan the intraday long and short lists and the swing and positional lists. Use only calls with a confidence clearly above the naive benchmark shown, because most sit around 50%.
-   - Note the horā and daśā windows. In the book's method these time entries and exits; they don't pick direction on their own.
-   - Treat any call as a filter on your own technical and fundamental view, never as a stand-alone trade.
-2. **Evening (optional):**
-   - Open *Prediction tracker*, choose mode **live**, and check the hit-rate against the naive benchmark.
-   - The cumulative line is the honest scorecard. After about 60 sessions it starts to mean something; after about 250, it tells you whether to keep using it.
-3. **Weekly:** open *Month grid* and *12-month outlook* for the coming red/green clusters and transit dates. Download the refreshed workbook if you prefer Excel.
-4. **Each Dīpāvali:** add the Muhurat-session change to `data/muhurat.json`, e.g. `["2026-11-08", 250]`. Commit it on github.com, and Chapter 19 picks it up from the next run.
+## Will anything sleep or lose data?
+- **The dashboard** (Streamlit Cloud) goes to sleep after a period with no visitors. Opening the link wakes it in about 30 seconds. It holds no data of its own, so nothing is lost.
+- **The record** lives in this GitHub repo, and the GitHub Action writes it, not the app. If GitHub delays a morning run past the 09:15 IST open, those calls are kept but marked *late* and excluded from the score, so a delay can never flatter the record. A missed evening run is caught up by the next one: every pending call is scored once its prices exist.
+- **Price-feed lag:** NSE data usually appears the same evening. US crude and gas data can lag 2–4 days, so those calls show "awaiting outcome" a little longer.
+- **Limits:** this uses about 70 of the 2,000 free Action minutes per month. GitHub only pauses scheduled jobs in *public* repos after 60 days without activity; this repo is private and the bot commits daily.
+
+## Your daily routine (≈3 minutes)
+1. **Before 09:15 IST, open Today.**
+   - Read the three Nifty views (Today / Next week / Next 2 months).
+   - Read the business-cycle note.
+   - Look at **Actionable calls**. These are the only calls with a historical edge, and many days there are none, by design.
+   - Use **Best timing** to pick entry and exit windows.
+2. **Nothing to log or settle.** The 08:00 IST job records the calls and the 20:00 IST job scores them.
+3. **Once a week:** open **Scorecard** to see live accuracy vs coin-flip and benchmark, and **12-month outlook** for upcoming turning points.
+4. **Each Diwali:** add the Muhurat result to `data/muhurat.json`, for example `["2026-11-08", 250]`.
+
+## The pages
+| Page | What it answers |
+|---|---|
+| Today | What's the view now, what's actionable, when to time it, why |
+| Month view | Day-by-day boxes for every sector and commodity |
+| 12-month outlook | How long each 2-month view lasts; month-by-month heat-map; cycle backdrop |
+| Look ahead | The call for any future date or month, with the typical historical move |
+| Scorecard | Were the calls right? (automatic) |
+| About & settings | Plain-English method, evidence, advanced settings, downloads |
+
+**Horizons:** *Today* = that session. *Next week* = average reading over the next 5 sessions. *Next 2 months* = average over the next 40 sessions; the Moon is excluded from this one, so it only changes on slow-planet events. Typical durations are 1–4 months for the 2-month view and 2–5 weeks for the next-week view.
+
+**What gets tracked:** the Nifty view (daily; the 2-month view on Mondays), plus any *actionable* call. Actionable means Bullish or Bearish, on a sector or commodity with a reliable price series, where that call type has beaten both a coin-flip and the simple benchmark on at least 30 independent past occurrences. Expect about 2–5 rows a day.
 
 ## Running it locally instead
 ```bash

@@ -30,18 +30,24 @@ def engine():
 def today_ist() -> date:
     return datetime.now(IST).date()
 
+OPEN_IST = (9, 15)
+
 def morning(d: date | None = None):
-    d = d or today_ist()
+    """Log today's calls. If this runs after the 09:15 IST open (e.g. GitHub delayed the job), the rows are
+    marked 'late' and excluded from the score, so a delayed run can never flatter the record."""
+    now = datetime.now(IST); d = d or now.date()
     if d.weekday() >= 5:
         print(f'{d} is a weekend — nothing logged.'); return 0
-    n = TR.log_predictions(engine(), d, C.conf_fn, mode='live')
-    print(f'logged {n} predictions for {d}'); return n
+    late = d < now.date() or (d == now.date() and (now.hour, now.minute) >= OPEN_IST)
+    n = TR.log_predictions(engine(), d, mode='late' if late else 'live')
+    print(f"logged {n} calls for {d}{' (LATE — excluded from score)' if late else ''}"); return n
 
 def evening():
-    n = TR.settle(); s = TR.stats(mode='live'); sb = TR.stats(mode='backfill')
-    summary = dict(updated=datetime.now(IST).isoformat(timespec='minutes'), settled_now=n, live=s, backfill_baseline=sb)
+    """Score every pending call whose horizon has finished. Idempotent: a missed evening is caught up next time."""
+    n = TR.settle(); s = TR.stats(modes=('live',)); p = TR.stats(modes=('paper',))
+    summary = dict(updated=datetime.now(IST).isoformat(timespec='minutes'), scored_now=n, live=s, paper_baseline=p)
     (TR.TDIR / 'summary.json').write_text(json.dumps(summary, indent=1, default=float))
-    print(f'settled {n}; live calls so far: {s.get("n", 0)} hit {s.get("hit", float("nan")):.3f}' if s.get('n') else f'settled {n}; no live settled calls yet')
+    print(f"scored {n}; live record: {s.get('n', 0)} calls" + (f", {s['hit']:.1%} correct" if s.get('n') else ''))
     return n
 
 def weekly():

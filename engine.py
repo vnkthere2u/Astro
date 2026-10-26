@@ -53,6 +53,7 @@ CH7_HZ = {'Mo': 'intraday', 'Su': 'short', 'Ma': 'short', 'Me': 'short', 'Ve': '
 CH7_W = {'Mo': 1.0, 'Su': .9, 'Ma': .8, 'Me': .6, 'Ve': .6, 'Ju': 1.0, 'Sa': 1.0, 'Ra': .7, 'Ke': .7, 'Ur': .4, 'Ne': .4, 'Pl': .3}
 DEFAULT_W = dict(ch6=1.0, ch7=1.0, ch8=1.2, ch10=0.8, ch11=0.6, ch14=0.7, ch16=1.0, ch17=1.2, ch18=1.2, ch19=0.5)
 SCALE = {'intraday': 1.6, 'short': 1.6, 'long': 1.6}
+SMOOTH = {'short': 5, 'long': 40}     # forward window in trading sessions: next week / next ~2 months
 THRESH = 0.15
 
 @dataclass
@@ -92,16 +93,64 @@ class Engine:
         self.W = {**DEFAULT_W, **(weights or {})}
         self.muhurat = sorted(muhurat or [], key=lambda x: x[0])   # [(date, points_change)]
         self.sunrise_override = sunrise_override or {}
+        self._cache = {}
+
+    # ------------------------------------------------------------ stabilised view
+    def raw(self, d: date) -> 'DayResult':
+        r = self._cache.get(d)
+        if r is None:
+            r = self._cache[d] = self.day(d)
+        return r
+
+    @staticmethod
+    def sessions(d: date, n: int) -> list:
+        out, x = [], d
+        while len(out) < n:
+            if x.weekday() < 5: out.append(x)
+            x += timedelta(days=1)
+        return out
+
+    def view(self, d: date) -> 'DayResult':
+        """Scores as shown to the user. Intraday = that day's sky. Short / long = average of the daily
+        readings over the next 5 / 40 sessions, so a 'next 2 months' call only changes when a slow planet
+        changes rāśi, stations, or forms / leaves an aspect — not because of the Moon."""
+        import copy
+        r = self.raw(d)
+        sc = {t: {'intraday': v['intraday']} for t, v in r.scores.items()}
+        for hz, n in SMOOTH.items():
+            rs = [self.raw(x) for x in self.sessions(d, n)]
+            for t in sc: sc[t][hz] = sum(x.scores[t][hz] for x in rs) / n
+        v = copy.copy(r); v.raw_scores = r.scores; v.scores = sc
+        return v
+
+    def frame(self, start: date, end: date, targets=None):
+        """Weekday DataFrame of stabilised scores: index date, columns (target, horizon)."""
+        import pandas as pd
+        days = [x for x in (start + timedelta(days=i) for i in range((end - start).days + 1)) if x.weekday() < 5]
+        ext = self.sessions(end + timedelta(days=1), max(SMOOTH.values()))
+        alld = days + ext
+        targets = targets or list(self.raw(start).scores)
+        raw = {(t, hz): [self.raw(x).scores[t][hz] for x in alld] for t in targets for hz in HORIZONS}
+        df = pd.DataFrame(raw, index=pd.to_datetime(alld))
+        df.columns = pd.MultiIndex.from_tuples(df.columns)
+        out = df.copy()
+        for hz, n in SMOOTH.items():
+            cols = [c for c in df.columns if c[1] == hz]
+            out[cols] = df[cols][::-1].rolling(n, min_periods=1).mean()[::-1]
+        return out.loc[pd.to_datetime(days)]
 
     # ------------------------------------------------------------ helpers
     @staticmethod
-    def _asp(c: ac.Chart):
+    def _asp(c: ac.Chart, slow=False):
+        """Aspect matrix. slow=True drops Candra as an aspecting graha: the Moon's aspects change every
+        few hours, so they belong to the intraday horizon only (book: Candra→intraday, Sūrya→short, Guru→long)."""
         if not hasattr(c, '_asp'):
             c._asp = ac.aspect_matrix(c)
-        return c._asp
+            c._asp_slow = {t: {a: v for a, v in d.items() if a != 'Mo'} for t, d in c._asp.items()}
+        return c._asp_slow if slow else c._asp
 
-    def _q(self, c, karaka, good=None, bad=None):
-        A = self._asp(c)[karaka]
+    def _q(self, c, karaka, good=None, bad=None, slow=False):
+        A = self._asp(c, slow)[karaka]
         good = FAV[karaka]['good'] if good is None else good
         bad = FAV[karaka]['bad'] if bad is None else bad
         g = sum(s for a, (h, s) in A.items() if a in good)
@@ -161,7 +210,7 @@ class Engine:
                     T = trig[x['trigger_planet']]
                     active = T.sign in x['trigger_rasis'] or T.nak in x['trigger_naks']
                     if not active: continue
-                    qs = [self._q(c, k)[0] for k in x['karakas']]
+                    qs = [self._q(c, k, slow=(hz != 'intraday'))[0] for k in x['karakas']]
                     q = sum(qs) / len(qs) if qs else 0
                     q = max(-1.5, min(1.5, q))
                     if (side == 'buy' and q > 0) or (side == 'sell' and q < 0):
@@ -180,7 +229,7 @@ class Engine:
         for g in ac.GRAHAS:
             B = c[g]; e = CH7.get((g, B.sign))
             if not e: continue
-            A = self._asp(c)[g]
+            A = self._asp(c, slow=(g != 'Mo'))[g]
             m1 = sum(s for a, (h, s) in A.items() if a in e['cond_aspectors'])
             w = e.get('whereas') or {}
             m2 = sum(s for a, (h, s) in A.items() if a in w.get('aspectors', []))
@@ -336,9 +385,9 @@ class Engine:
         dn, dg = ac.dignity('Ju', ju.sign); v += 0.5 * dg; parts.append(f"Guru {dn} in {ac.RASI[ju.sign]} {0.5 * dg:+.2f}")
         if ac.combust(c, 'Ju'): v -= 0.5; parts.append('Guru asta (combust) −0.50')
         else: v += 0.15; parts.append('Guru udita +0.15')
-        A = self._asp(c)['Ju']
-        sm = sum(s for a, (h, s) in A.items() if a in ('Su', 'Mo'))
-        if sm: v += 0.4 * min(sm, 1.5); parts.append(f"aspected by Sūrya/Candra +{0.4 * min(sm, 1.5):.2f}")
+        A = self._asp(c, slow=True)['Ju']
+        sm = sum(s for a, (h, s) in A.items() if a == 'Su')
+        if sm: v += 0.4 * min(sm, 1.5); parts.append(f"aspected by Sūrya +{0.4 * min(sm, 1.5):.2f}")
         sr, sk = ac.sep(ju.lon, c['Ra'].lon), ac.sep(ju.lon, c['Ke'].lon)
         sn = min(sr, sk)
         c2 = ac.chart(c.dt + timedelta(days=5))
@@ -371,10 +420,10 @@ class Engine:
         nodes_water = [n for n in ('Ra', 'Ke') if ac.ELEMENT[c[n].sign] == 'Water']
         if nodes_water: v -= 0.2; parts.append(f"{'/'.join(ac.NAMES[n] for n in nodes_water)} in watery rāśi (cooling) −0.20")
         bq = 0
-        for g in ('Mo', 'Sa', 'Ur', 'Ne'):
-            bq += self._q(c, g)[0]
-        bq = max(-1, min(1, bq / 4)); v += 0.4 * bq
-        parts.append(f"Candra/Śani/Uranus/Neptune aspect balance {0.4 * bq:+.2f}")
+        for g in ('Sa', 'Ur', 'Ne'):
+            bq += self._q(c, g, slow=True)[0]
+        bq = max(-1, min(1, bq / 3)); v += 0.4 * bq
+        parts.append(f"Śani/Uranus/Neptune aspect balance {0.4 * bq:+.2f}")
         v = max(-1.5, min(1.5, v))
         txt = 'Crude cycle: ' + '; '.join(parts)
         for t, k in (('CRUDE', 1.0), ('NATGAS', 0.6), ('OILGAS', 0.5)):
