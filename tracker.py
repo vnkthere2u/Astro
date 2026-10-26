@@ -1,15 +1,14 @@
 """
 tracker.py — the scorecard's memory.
 
-What gets logged each trading morning (before the open, automatically):
-  • the Nifty view for today / next week (every day) and next 2 months (Mondays only — it changes slowly)
-  • every sector / commodity call that is ACTIONABLE: direction is Bullish or Bearish AND that kind of call
-    historically beat the simple benchmark on enough independent occurrences (calib.actionable)
-Neutral and 'no proven edge' calls are shown in the app but not logged — they are information, not trades.
+Every trading morning (before the open, automatically) the job logs the books' call for every tracked market,
+for all three horizons, exactly as the app shows it — including Neutral calls — together with each book's own
+verdict. Nothing is filtered by past accuracy. Rows are never edited; the evening job fills in what happened.
+Neutral calls are kept in the log but have no right/wrong (they are excluded from hit-rates).
 
-Rows are never edited after logging. The evening job fills in what actually happened.
 mode: live = logged before the open · late = logged after the open (kept, excluded from the score)
-      paper = reconstructed history used as a baseline (clearly separated)
+      paper = reconstructed history (baseline, shown separately)
+Scoring windows: today = open→close, short-term = 5 sessions, long-term = 40 sessions.
 """
 from __future__ import annotations
 from datetime import date, datetime, timedelta
@@ -20,61 +19,64 @@ import engine as E, data_sources as ds, calib as C
 HERE = Path(__file__).parent
 TDIR = HERE / 'data' / 'tracker'; TDIR.mkdir(parents=True, exist_ok=True)
 LOG = TDIR / 'predictions.csv'
-COLS = ['logged_at', 'mode', 'date', 'target', 'name', 'horizon', 'view', 'strength', 'score', 'confidence', 'tier',
-        'why', 'actual_ret', 'outcome', 'correct', 'status', 'settled_at']
+COLS = ['logged_at', 'mode', 'date', 'target', 'name', 'horizon', 'view', 'book1', 'book2', 'book3', 'disagree',
+        'past_hit_pct', 'why', 'actual_ret', 'outcome', 'correct', 'status', 'settled_at']
 HZ_SESSIONS = {'intraday': 1, 'short': 5, 'long': 40}
-HZ_WORD = {'intraday': 'Today', 'short': 'Next week', 'long': 'Next 2 months'}
-TEXT = ['logged_at', 'mode', 'target', 'name', 'horizon', 'view', 'strength', 'tier', 'why', 'outcome', 'status', 'settled_at']
+HZ_WORD = {'intraday': 'Today', 'short': 'Short-term', 'long': 'Long-term'}
+TEXT = ['logged_at', 'mode', 'target', 'name', 'horizon', 'view', 'book1', 'book2', 'book3', 'why', 'outcome', 'status', 'settled_at']
 TRACKABLE = [t for t, src in ds.PROXY.items() if src[0][2] in ('direct', 'proxy') and src[0][0] != 'yf']
+VIEW = {1: 'Up', -1: 'Down', 0: 'Neutral', None: 'No rule'}
 
-def view_word(s):
-    return 'Bullish' if s > E.THRESH else 'Bearish' if s < -E.THRESH else 'Neutral'
-def strength_word(s):
-    a = abs(s); return '—' if a <= E.THRESH else 'Mild' if a < 0.3 else 'Moderate' if a < 0.5 else 'Strong'
 
 def _types(df):
     df = df.copy()
     for c in COLS:
         if c not in df: df[c] = np.nan
     for c in TEXT: df[c] = df[c].astype(object)
-    for c in ['score', 'confidence', 'actual_ret', 'correct']: df[c] = pd.to_numeric(df[c], errors='coerce')
+    for c in ['past_hit_pct', 'actual_ret', 'correct']: df[c] = pd.to_numeric(df[c], errors='coerce')
+    df['disagree'] = df['disagree'].astype(object)
     df['date'] = pd.to_datetime(df['date'])
     return df[COLS]
 
+
 def load() -> pd.DataFrame:
-    return _types(pd.read_csv(LOG)) if LOG.exists() else _types(pd.DataFrame(columns=COLS))
+    if not LOG.exists(): return _types(pd.DataFrame(columns=COLS))
+    df = pd.read_csv(LOG)
+    if 'book1' not in df.columns:        # log from the earlier (score-based) version → archive it, start clean
+        LOG.rename(TDIR / 'predictions_v1_archive.csv')
+        return _types(pd.DataFrame(columns=COLS))
+    return _types(df)
+
 
 def save(df):
     df.sort_values(['date', 'horizon', 'target']).to_csv(LOG, index=False)
 
+
 def todays_calls(eng: E.Engine, d: date):
-    """The calls the app presents as actionable for date d (plus the Nifty view)."""
-    v = eng.view(d); out = []
-    for hz in E.HORIZONS:
-        s = v.scores['NIFTY'][hz]
-        if not (hz == 'long' and d.weekday() != 0):
-            out.append(('NIFTY', hz, s, C.confidence('NIFTY', hz, s)))
-        for t in TRACKABLE:
-            if t == 'NIFTY': continue
-            s = v.scores[t][hz]; cf = C.confidence(t, hz, s)
-            if C.actionable(cf): out.append((t, hz, s, cf))
-    return v, out
+    r = eng.day(d); out = []
+    for t in TRACKABLE:
+        for hz in E.HORIZONS:
+            out.append((t, hz, r.final[(t, hz)], r.book[(t, hz)], r.disagree[(t, hz)]))
+    return r, out
+
 
 def log_predictions(eng: E.Engine, d: date, mode='live') -> int:
     df = load()
     have = set(zip(df['date'].dt.date, df['target'], df['horizon'])) if len(df) else set()
-    v, calls = todays_calls(eng, d); new = []
-    for t, hz, s, cf in calls:
+    r, calls = todays_calls(eng, d); new = []
+    for t, hz, f, bv, dis in calls:
         if (d, t, hz) in have: continue
-        drivers = sorted((c for c in v.contrib.get(t, []) if c.horizon == hz), key=lambda c: -abs(c.value))[:2]
+        votes = [h for h in r.votes(t, hz) if h['dir'] in (1, -1)]
+        why = ' | '.join(f"B{h['book']} {h['chapter']}: {h['text'][:80]}" for h in votes[:3])
         new.append(dict(logged_at=datetime.now().isoformat(timespec='seconds'), mode=mode, date=pd.Timestamp(d), target=t,
-                        name=E.TARGET_NAME[t], horizon=hz, view=view_word(s), strength=strength_word(s), score=round(s, 4),
-                        confidence=(cf or {}).get('p'), tier=(cf or {}).get('tier', '—'),
-                        why=' | '.join(c.text[:90] for c in drivers), status='pending'))
+                        name=E.TARGET_NAME[t], horizon=hz, view=VIEW[f], book1=VIEW[bv[1]], book2=VIEW[bv[2]], book3=VIEW[bv[3]],
+                        disagree=bool(dis), past_hit_pct=C.pct(t, hz, 'final', f), why=why, status='pending' if f in (1, -1) else 'no call'))
     if new:
-        df = _types(pd.concat([df, _types(pd.DataFrame(new))], ignore_index=True)) if len(df) else _types(pd.DataFrame(new))
+        nd = _types(pd.DataFrame(new))
+        df = _types(pd.concat([df, nd], ignore_index=True)) if len(df) else nd
         save(df)
     return len(new)
+
 
 def settle(local_dir=None) -> int:
     df = load()
@@ -95,9 +97,10 @@ def settle(local_dir=None) -> int:
             if pd.isna(ret): continue
             df.loc[i, 'actual_ret'] = float(ret)
             df.loc[i, 'outcome'] = 'Up' if ret > 0 else 'Down' if ret < 0 else 'Flat'
-            df.loc[i, 'correct'] = np.nan if row['view'] == 'Neutral' else float((ret > 0) == (row['view'] == 'Bullish'))
+            df.loc[i, 'correct'] = float((ret > 0) == (row['view'] == 'Up')) if ret != 0 else np.nan
             df.loc[i, 'status'] = 'scored'; df.loc[i, 'settled_at'] = datetime.now().isoformat(timespec='seconds'); n += 1
     save(df); return n
+
 
 def paper_history(eng: E.Engine, start: date, end: date, local_dir=None):
     d = start
@@ -106,10 +109,11 @@ def paper_history(eng: E.Engine, start: date, end: date, local_dir=None):
         d += timedelta(days=1)
     return settle(local_dir)
 
+
 def scored(df=None, modes=('live',)):
     df = load() if df is None else df
-    s = df[(df.status == 'scored') & (df['mode'].isin(modes)) & df.correct.notna()].copy()
-    return s
+    return df[(df.status == 'scored') & (df['mode'].isin(modes)) & df.correct.notna()].copy()
+
 
 def stats(df=None, modes=('live',)) -> dict:
     s = scored(df, modes)
@@ -118,9 +122,14 @@ def stats(df=None, modes=('live',)) -> dict:
     out['by_horizon'] = {hz: dict(n=int(len(g)), hit=float(g.correct.mean()),
                                   naive=float(max((g.actual_ret > 0).mean(), (g.actual_ret < 0).mean())))
                          for hz, g in s.groupby('horizon')}
-    out['actionable'] = dict(n=int((s.target != 'NIFTY').sum()), hit=float(s[s.target != 'NIFTY'].correct.mean()) if (s.target != 'NIFTY').any() else None)
-    out['nifty'] = dict(n=int((s.target == 'NIFTY').sum()), hit=float(s[s.target == 'NIFTY'].correct.mean()) if (s.target == 'NIFTY').any() else None)
+    out['nifty'] = {hz: dict(n=int(len(g)), hit=float(g.correct.mean())) for hz, g in s[s.target == 'NIFTY'].groupby('horizon')}
+    by_book = {}
+    for b in ('book1', 'book2', 'book3'):
+        x = s[s[b].isin(['Up', 'Down'])]
+        if len(x): by_book[b] = dict(n=int(len(x)), hit=float(((x[b] == 'Up') == (x.actual_ret > 0)).mean()))
+    out['by_book'] = by_book
     return out
+
 
 def running(df=None, modes=('live',)) -> pd.DataFrame:
     s = scored(df, modes)

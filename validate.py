@@ -28,6 +28,38 @@ def run_tests(ayan_name: str, node_name: str) -> list:
     def add(tid, group, desc, book, got, ok, page, hard=True):
         T.append(dict(id=tid, group=group, test=desc, book=book, engine=got, pass_=bool(ok), page=page, hard=hard))
 
+    # ---------------- Book 3 (Predicting the Nifty & Sensex) Ch.14 worked examples — 09:00 IST Mumbai, 2012
+    B3EX = [((2012, 2, 1), 'Aries', 'Mrita', {'Ju', 'Sa'}, 'Kṛttikā', 'Shukla', 9),
+            ((2012, 2, 2), 'Taurus', 'Vriddha', {'Ra', 'Ke'}, 'Rohiṇī', 'Brahma', 10),
+            ((2012, 2, 3), 'Taurus', 'Kumar', {'Ra', 'Ke'}, 'Rohiṇī', 'Indra', 11),
+            ((2012, 2, 7), 'Cancer', 'Yuva', {'Sa', 'Su', 'Me'}, 'Puṣya', 'Ayushman', 15),
+            ((2012, 2, 8), 'Cancer', 'Baal', {'Sa', 'Su', 'Me'}, 'Aśleṣā', 'Saubhagya', 16),
+            ((2012, 2, 9), 'Leo', 'Kumar', {'Ma', 'Ju'}, 'Maghā', 'Atiganda', 17)]
+    for i, (ymd, sg, av, asp, nk, yg, tt) in enumerate(B3EX):
+        c = ac.chart(ist(*ymd, 9, 0)); m = c['Mo']
+        got = (ac.RASI_EN[m.sign], ac.avastha(m.lon), set(ac.b3_aspectors(c, 'Mo')), ac.NAK[m.nak], ac.YOGA_NAMES[ac.yoga_index(c)], c.tithi)
+        exp = (sg, av, asp, nk, yg, tt)
+        add(f'B3-{i + 1}', 'Book 3 Ch.14', f'{ymd[2]:02d}-Feb-2012 09:00: Moon sign, avasthā, aspects on Moon, nakshatra, yoga, tithi',
+            str(exp), str(got), got == exp, 'Ch.14')
+    # ---------------- Book 2 (Investment Muhurtas) Ch.34 worked trades — nakshatra on the trade day
+    B2EX = [((2014, 7, 8), 'Viśākhā'), ((2014, 7, 14), 'Śravaṇa'), ((2014, 5, 2), 'Mṛgaśīrṣā'), ((2014, 5, 22), 'Śatabhiṣak'),
+            ((2014, 5, 30), 'Mṛgaśīrṣā'), ((2014, 6, 6), 'Pūrva Phālgunī'), ((2013, 6, 25), 'Uttara Aṣāḍha'), ((2013, 7, 1), 'Revatī'),
+            ((2013, 8, 23), 'Uttara Bhādra'), ((2013, 9, 13), 'Mūla'), ((2013, 11, 22), 'Punarvasu'), ((2013, 12, 10), 'Pūrva Bhādra'),
+            ((2013, 12, 20), 'Puṣya'), ((2014, 1, 7), 'Uttara Bhādra'), ((2014, 1, 15), 'Ārdrā'), ((2013, 7, 24), 'Dhaniṣṭhā'), ((2013, 8, 6), 'Puṣya')]
+    for i, (ymd, nk) in enumerate(B2EX):
+        seen = {ac.NAK[ac.chart(ist(*ymd, h, 0)).moon_nak] for h in (9, 11, 13, 15)}
+        add(f'B2-{i + 1}', 'Book 2 Ch.34', f'Nakshatra during the session {ymd[2]:02d}-{ymd[1]:02d}-{ymd[0]}', nk, '/'.join(sorted(seen)), nk in seen, 'Ch.34')
+    B2DEG = [((2014, 7, 8), 'Ma', 5, 27), ((2014, 7, 14), 'Ma', 6, 0), ((2014, 7, 14), 'Ve', 2, 0), ((2014, 7, 14), 'Su', 2, 27),
+             ((2014, 5, 2), 'Me', 0, 25), ((2014, 5, 22), 'Me', 1, 29), ((2014, 5, 22), 'Ve', 11, 28), ((2014, 5, 30), 'Me', 2, 6),
+             ((2014, 6, 6), 'Ju', 2, 27), ((2013, 6, 25), 'Me', 2, 29), ((2013, 7, 1), 'Ma', 1, 27), ((2013, 7, 1), 'Me', 2, 28),
+             ((2013, 8, 23), 'Ma', 3, 2), ((2013, 8, 23), 'Me', 4, 4), ((2013, 9, 13), 'Su', 4, 26), ((2013, 11, 22), 'Ma', 4, 27),
+             ((2013, 12, 10), 'Su', 7, 24), ((2013, 12, 20), 'Me', 7, 29), ((2014, 1, 7), 'Ve', 8, 29), ((2014, 1, 15), 'Su', 9, 1),
+             ((2013, 8, 6), 'Ve', 4, 24)]
+    for i, (ymd, g, sg, dg) in enumerate(B2DEG):
+        b = ac.chart(ist(*ymd, 9, 15))[g]
+        ok = b.sign == sg and abs(b.deg - dg) <= 1.5 or (b.sign - sg) % 12 in (1, 11) and min(abs(b.lon - sg * 30 - dg), 360 - abs(b.lon - sg * 30 - dg)) <= 1.5
+        add(f'B2-D{i + 1}', 'Book 2 Ch.34', f'{ac.EN[g]} degree {ymd[2]:02d}-{ymd[1]:02d}-{ymd[0]}', f'{dg}° {ac.RASI_EN[sg]}', f'{b.deg:.1f}° {ac.RASI_EN[b.sign]}', ok, 'Ch.34')
+
     # T1 Moon in Kanyā 11°32′ (Ch.12 worked example)
     c = ac.chart(ist(2009, 3, 12, 9, 55))
     m = c['Mo']; err = abs((m.lon - (5 * 30 + 11 + 32 / 60))) * 60
@@ -174,6 +206,24 @@ def aspect_fit():
     return dict(rows=rows, recall=tp / (tp + fn), precision=tp / (tp + fp), tp=tp, fp=fp, fn=fn,
                 minimum_possible_errors=5, contradictions=CONTRADICTIONS)
 
+def method_tests():
+    """Book 3 Ch.14: the app's method must reproduce the book's own concluded predictions; Book 2 Ch.34: every
+    planet the book cites as signalling a reversal must be inside the app's reversal window."""
+    import book3 as B3, book2 as B2
+    out = []
+    for ymd, exp in [((2012, 2, 1), 0), ((2012, 2, 2), 1), ((2012, 2, 3), 1), ((2012, 2, 7), 0), ((2012, 2, 8), 1), ((2012, 2, 9), 1)]:
+        r = B3.intraday(ac.chart(ist(*ymd, 9, 0)))
+        out.append(dict(id=f'M3-{ymd[2]}', test=f'Book 3 concluded prediction {ymd[2]:02d}-Feb-2012', book=B3.WORD[exp], engine=B3.WORD[r['dir']], pass_=r['dir'] == exp))
+    cites = [((2014, 7, 8), 'Ma'), ((2014, 7, 14), 'Ma'), ((2014, 7, 14), 'Ve'), ((2014, 7, 14), 'Su'), ((2014, 5, 2), 'Me'), ((2014, 5, 22), 'Me'),
+             ((2014, 5, 22), 'Ve'), ((2014, 5, 30), 'Me'), ((2014, 6, 6), 'Ju'), ((2013, 6, 25), 'Me'), ((2013, 7, 1), 'Ma'), ((2013, 7, 1), 'Me'),
+             ((2013, 8, 23), 'Ma'), ((2013, 8, 23), 'Me'), ((2013, 9, 13), 'Su'), ((2013, 11, 22), 'Ma'), ((2013, 12, 10), 'Su'), ((2013, 12, 20), 'Me'),
+             ((2014, 1, 7), 'Ve'), ((2014, 1, 15), 'Su'), ((2013, 8, 6), 'Ve')]
+    for ymd, g in cites:
+        w = {x['planet'] for x in B2.reversal_window(ac.chart(ist(*ymd, 9, 15)))}
+        out.append(dict(id=f'M2-{ymd[0]}{ymd[1]:02d}{ymd[2]:02d}{g}', test=f'Book 2 reversal window {ymd[2]:02d}-{ymd[1]:02d}-{ymd[0]} ({ac.EN[g]})',
+                        book='reversal possible', engine='in window' if g in w else 'not in window', pass_=g in w))
+    return out
+
 def main(out_dir: Path):
     configs = [(a, n) for a in ['Lahiri', 'Raman', 'Krishnamurti', 'Fagan-Bradley', 'Tropical'] for n in ['true', 'mean']]
     matrix = []
@@ -191,6 +241,7 @@ def main(out_dir: Path):
     rep = dict(generated=datetime.now(UTC).isoformat(timespec='seconds'), matrix=matrix,
                chosen=chosen, tests=detail[f"{chosen['ayanamsa']}/{chosen['node']}"] if chosen else [],
                aspect_fit=fit, swisseph_version=ac.swe.version)
+    rep['method_tests'] = method_tests()
     out_dir.mkdir(parents=True, exist_ok=True)
     (out_dir / 'validation_report.json').write_text(json.dumps(rep, ensure_ascii=False, indent=1, default=str))
     return rep
@@ -202,4 +253,5 @@ if __name__ == '__main__':
     print('CHOSEN:', rep['chosen'])
     for t in rep['tests']:
         print(('PASS' if t['pass_'] else 'FAIL'), ('H' if t['hard'] else 's'), t['id'], t['test'], '|', t['book'], '|', t['engine'])
+    for t in rep['method_tests']: print(('PASS' if t['pass_'] else 'FAIL'), 'M', t['id'], t['test'], '|', t['book'], '|', t['engine'])
     f = rep['aspect_fit']; print('aspect fit recall', f['recall'], 'precision', round(f['precision'], 3), f['tp'], f['fp'], f['fn'])

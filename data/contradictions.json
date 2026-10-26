@@ -1,0 +1,121 @@
+[
+ {
+  "id": 1,
+  "topic": "Nakshatra direction",
+  "books": "Book 2 vs Book 3",
+  "detail": "Book 2 (Ch.5 & Ch.34) gives one fixed Buy/Sell list for the 27 nakshatras. Book 3 gives a separate result for every nakshatra under each of the 12 Sun signs. Where both give a direction they disagree in 79 of 146 cases (e.g. Rohini with Sun in Aries: Book 3 Down, Book 2 Buy).",
+  "app": "Each book votes with its own table; when they point opposite ways the call is Neutral and marked 'books disagree'."
+ },
+ {
+  "id": 2,
+  "topic": "Yoga direction",
+  "books": "Book 2 vs Book 3",
+  "detail": "Book 2 Ch.7 marks 9 yogas bad and 18 good for investment. Book 3 gives yoga results per Sun sign; they disagree in 73 of 152 directional cases (e.g. Vyatipata with Sun in Aries: Book 3 Up, Book 2 Bad).",
+  "app": "Each book uses its own table."
+ },
+ {
+  "id": 3,
+  "topic": "Tithi direction",
+  "books": "Book 2 vs Book 3, and inside Book 2",
+  "detail": "Book 3's per-Sun-sign tithi results disagree with Book 2's trading table in 56 of 105 cases. Inside Book 2, three tithi lists conflict: the trading table (e.g. 1st = Neutral), the favourable/unfavourable table (Shukla 1 Unfavourable, Krishna 1 Favourable), the deity descriptions (1st 'good for all investments') and the Galgraha list (1st to be avoided).",
+  "app": "Book 2's 'For Trading (Buying / Selling)' table is used for the tithi vote because it is the one written for trading; Galgraha, Rikta-on-Saturday etc. vote separately as the book lists them."
+ },
+ {
+  "id": 4,
+  "topic": "Nakshatras for buying",
+  "books": "inside Book 2",
+  "detail": "Ch.24 (buying/selling muhurta) names Ashwini, Chitra, Swati, Shravana, Dhanishtha, Shatabhisha and Revati as buying nakshatras, but the Ch.5/Ch.34 trading chart marks Ashwini, Chitra, Dhanishtha, Shatabhisha and Revati as Selling. Dhanishtha-Revati are also 'Panchaka — avoid investments'.",
+  "app": "Uses the Ch.5/Ch.34 chart — the one the author says he keeps 'ready in hand for trading' and uses in all ten worked trades."
+ },
+ {
+  "id": 5,
+  "topic": "Planetary hours (horā)",
+  "books": "Book 1 vs Book 2",
+  "detail": "Book 1 Ch.10: a horā is bullish or bearish for its sectors depending on which planets aspect the horā lord that day. Book 2 Ch.14: Sun, Mars and Saturn horās are always for selling; Moon, Mercury, Jupiter and Venus horās always for buying.",
+  "app": "Both are shown side by side in the timing table; horās are timing windows, not part of the day's call."
+ },
+ {
+  "id": 6,
+  "topic": "Aspect convention",
+  "books": "Book 1 vs Book 3",
+  "detail": "Book 1's worked examples only reproduce with trines and with Rāhu/Ketu casting 5th/9th aspects; Book 3's six Ch.14 examples only reproduce with pure sign-based Vedic aspects and Rāhu/Ketu aspecting by conjunction/7th only.",
+  "app": "Each book's rules are evaluated with the convention its own examples require (both verified 100% in validate.py)."
+ },
+ {
+  "id": 7,
+  "topic": "Sun in Aries — sectors",
+  "books": "Book 1 vs Book 3, and inside Book 3",
+  "detail": "Book 1 Ch.7: Sun in Aries aspected by Mercury, Venus or Rāhu → those sectors decline. Book 3 Ch.2 adds Saturn to that list — yet Book 3's own table says Sun in Aries aspected by Saturn → Nifty up (24 of 37).",
+  "app": "Book 1 and Book 3 each vote with their own list."
+ },
+ {
+  "id": 8,
+  "topic": "Recession signal",
+  "books": "Book 1 vs Book 3",
+  "detail": "Book 1 Ch.16: Saturn in a fire sign is a recession only when Jupiter aspects it (conjunction/trine/opposition). Book 3 Ch.1: Saturn in Aries, Leo or Sagittarius is bearish for Indian markets with no Jupiter condition.",
+  "app": "Both vote on the long-term Nifty call; if one is active and the other is not they simply don't cancel."
+ },
+ {
+  "id": 9,
+  "topic": "Effect of malefic aspects on the Moon",
+  "books": "inside Book 3",
+  "detail": "Ch.1 says malefic aspects on the Moon strengthen negative predictions. Ch.14 Practicals 2 and 3 show Rāhu/Ketu aspects turning a 'down' reading into an Up call ('weak Moon fails to create selling pressure').",
+  "app": "Follows Ch.14 — those are the book's actual predictions, and the method reproduces all six of them."
+ },
+ {
+  "id": 10,
+  "topic": "Atiganda yoga, 9 Feb 2012",
+  "books": "inside Book 3",
+  "detail": "Practical 7 lists Atiganda as Neutral although the Sun-in-Capricorn table says 'if Moon aspected by Jupiter → upmove' and Jupiter aspected the Moon that day.",
+  "app": "Applies the table rule as written; the final call (Up) is unchanged."
+ },
+ {
+  "id": 11,
+  "topic": "Business-cycle watch-list",
+  "books": "inside Book 1",
+  "detail": "Ch.16 defines the cycle by Jupiter's conjunction/trine/opposition to Saturn, but its own watch-list (2017-18, 2036-38) uses sextiles.",
+  "app": "Uses the rule as defined, not the watch-list."
+ },
+ {
+  "id": 12,
+  "topic": "Market ascendant",
+  "books": "Book 1 vs Book 3",
+  "detail": "Book 1 casts a fresh opening-bell lagna every day (Ch.11, 14). Book 3 uses a fixed Taurus ascendant for Indian markets (Ch.1).",
+  "app": "Book 1 rules use the opening-bell lagna; Book 3 rules use Taurus."
+ },
+ {
+  "id": 13,
+  "topic": "Trend-reversal window",
+  "books": "inside Book 2",
+  "detail": "Ch.34 says reversals come from 5 days before to 5 days after a planet's sign change, and gives as the reason that the planet is then in Mrita/Baal avasthā. Its examples need both readings: Jupiter 27° Gemini is ~13 days from its ingress (fits only the avasthā reading), Venus 24° Leo is 23.5° by ephemeris (fits only the 5-day reading).",
+  "app": "A planet is in the window if either statement holds (sign change within 5 days, or 0°–6° / 24°–30° of its sign in whole degrees). This reproduces all 21 planets the book cites."
+ },
+ {
+  "id": 14,
+  "topic": "Weekdays",
+  "books": "inside Book 2",
+  "detail": "Tuesday and Sunday are 'cruel — selling advisable', but Tuesday is also 'favourable for pharma, crude, metals, capital goods, automobiles' and Sunday 'for gold and garments'. Ch.18 says avoid Tuesday for major investments.",
+  "app": "Both statements vote: the cruel-day vote on everything, the sector vote on those sectors."
+ },
+ {
+  "id": 15,
+  "topic": "Inauspicious-yoga lists",
+  "books": "inside Book 2",
+  "detail": "Ch.7 table: 9 bad yogas; the sentence above it lists 8 (omits Ganda); Ch.18 lists 7 (omits Vishkumbha and Vajra).",
+  "app": "Uses the 9-yoga table."
+ },
+ {
+  "id": 16,
+  "topic": "Planets the books do not classify",
+  "books": "gap",
+  "detail": "Book 3 never says whether Venus strengthens or weakens the Moon. Book 3 Ch.1's 'friendly sign / friendly planets' for the Sun and Mars is not defined in Book 3.",
+  "app": "Uses the same author's Book 1 lists (Venus hostile to the Moon; Ch.4 friends and enemies)."
+ },
+ {
+  "id": 17,
+  "topic": "Pages missing from the supplied copies",
+  "books": "gap",
+  "detail": "The supplied Book 3 PDF skips pages: of 1,236 table entries (12 Sun signs × 103) about 960 are present; the Leo and Virgo sector paragraphs are missing. Book 2's Dagdha/Visha/Hutashan table is cut off at Saturday. Ch.14 quotes seven of the missing Capricorn entries, which are used.",
+  "app": "Where an entry is missing the app casts no vote for it (shown as 'not in the supplied copy') — nothing is filled in."
+ }
+]

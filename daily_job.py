@@ -3,7 +3,7 @@ daily_job.py — unattended daily operation (run by GitHub Actions, or by hand).
 
   python daily_job.py morning   # log today's predictions (IST date) before the open — immutable
   python daily_job.py evening   # download latest prices, settle every pending prediction, refresh summary
-  python daily_job.py weekly    # rebuild AstroMarket_Workbook.xlsx for the next 365 days
+  python daily_job.py paper     # rebuild the paper (reconstructed) baseline for the last 90 days
   python daily_job.py all       # morning + evening (catch-up)
 
 Writes data/tracker/predictions.csv and data/tracker/summary.json; the workflow commits them,
@@ -50,13 +50,16 @@ def evening():
     print(f"scored {n}; live record: {s.get('n', 0)} calls" + (f", {s['hit']:.1%} correct" if s.get('n') else ''))
     return n
 
-def weekly():
-    import build_excel
-    out = build_excel.build(today_ist() + timedelta(days=1), 365)
-    print('workbook →', out)
+def paper(days=90):
+    """Reconstructed baseline — what the books would have said on recent days (shown separately, never mixed with live)."""
+    df = TR.load()
+    if len(df): TR.save(df[df['mode'] != 'paper'])
+    end = today_ist() - timedelta(days=1)
+    n = TR.paper_history(engine(), end - timedelta(days=days), end)
+    print(f'paper baseline rebuilt; {n} calls scored')
 
 if __name__ == '__main__':
     mode = sys.argv[1] if len(sys.argv) > 1 else 'all'
     if mode in ('morning', 'all'): morning(date.fromisoformat(sys.argv[2]) if len(sys.argv) > 2 else None)
     if mode in ('evening', 'all'): evening()
-    if mode == 'weekly': weekly()
+    if mode == 'paper': paper()

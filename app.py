@@ -1,7 +1,7 @@
-"""AstroMarket — daily astro-market views, outlook and scorecard.   Run: streamlit run app.py"""
+"""AstroMarket — the three Banerjee books, applied as written.   Run: streamlit run app.py"""
 from __future__ import annotations
 import json
-from datetime import date, datetime, time, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 import pandas as pd
 import streamlit as st
@@ -16,166 +16,176 @@ import tracker as TR
 HERE = Path(__file__).parent
 st.set_page_config(page_title='AstroMarket', page_icon='🪐', layout='wide')
 
-# ---------------------------------------------------------------- vocabulary (no letters, no jargon)
-GREEN, AMBER, RED = '#1f9d55', '#d69e2e', '#c53030'
-LIGHT = {'Bullish': '#c6f6d5', 'Neutral': '#fefcbf', 'Bearish': '#fed7d7'}
-DARK = {'Bullish': GREEN, 'Neutral': AMBER, 'Bearish': RED}
-ARROW = {'Bullish': '▲', 'Neutral': '◆', 'Bearish': '▼'}
-HZ = {'intraday': 'Today', 'short': 'Next week', 'long': 'Next 2 months'}
-HZ_HELP = {'intraday': "That session's open-to-close bias, from the Moon, nakshatra, opening-bell chart and planetary hours.",
-           'short': 'Average view over the next 5 sessions, from Sun, Mars, Mercury and Venus transits.',
-           'long': 'Average view over the next 40 sessions (~2 months), from Jupiter, Saturn, Rahu/Ketu, the business-cycle, gold and crude cycles. Changes only when a slow planet changes sign, turns, or forms/leaves an aspect.'}
-EDGE = {'High': ('Strong edge', '#1a365d'), 'Medium': ('Tradeable — modest edge', '#2b6cb0'),
-        'Low': ('No proven edge', '#718096'), 'Unproven': ('Too little history', '#a0aec0'), None: ('—', '#a0aec0')}
+# ---------------------------------------------------------------- vocabulary
+GREEN, AMBER, RED, GREY = '#1f9d55', '#d69e2e', '#c53030', '#a0aec0'
+WORD = {1: 'Up', -1: 'Down', 0: 'Neutral', None: 'No rule'}
+LIGHT = {'Up': '#c6f6d5', 'Neutral': '#fefcbf', 'Down': '#fed7d7', 'No rule': '#edf2f7'}
+DARK = {'Up': GREEN, 'Neutral': AMBER, 'Down': RED, 'No rule': GREY}
+ARROW = {'Up': '▲', 'Neutral': '◆', 'Down': '▼', 'No rule': '·'}
+HZ = {'intraday': 'Today', 'short': 'Short-term', 'long': 'Long-term'}
+HZ_HELP = {'intraday': "The session's direction. Book 1: Moon transits, nakshatra-lord, opening-bell chart. Book 2: the day's muhurta. Book 3: the Ch.14 Nifty method.",
+           'short': 'Book 1: Sun, Mars, Mercury, Venus transits. Book 3: Sun & Mars rule (Ch.1) and the Sun-transit sector paragraphs.',
+           'long': "Book 1: Jupiter, Saturn, Rahu/Ketu and outer-planet transits, business cycle (Ch.16), gold (Ch.17), crude (Ch.18), Muhurat (Ch.19). Book 3: Saturn from Taurus (Ch.1). Read for that day's sky — when the Moon or a fast planet is part of a long-term rule, the call can change from one day to the next."}
+BOOK = {1: 'Book 1 · Stock Market Astrology', 2: 'Book 2 · Investment Muhurtas', 3: 'Book 3 · Predicting the Nifty & Sensex'}
 
-def view(s): return TR.view_word(s)
-def strength(s): return TR.strength_word(s)
-def pill(s, small=False):
-    v = view(s); st_ = strength(s)
-    txt = f"{ARROW[v]} {v}" + (f" · {st_}" if v != 'Neutral' else '')
-    fs = '12px' if small else '14px'
-    return f"<span style='background:{LIGHT[v]};color:{DARK[v]};padding:2px 10px;border-radius:12px;font-weight:600;font-size:{fs}'>{txt}</span>"
-def edge_txt(cf):
-    if not cf: return "<span style='color:#a0aec0'>—</span>"
-    lab, col = EDGE[cf['tier']]
-    bench = f" vs {cf['naive']:.0%} benchmark" if cf.get('naive') else ''
-    return f"<span style='color:{col};font-size:12px'>{lab} · right {cf['p']:.0%} of the time historically{bench}</span>"
-def cell_text(s): v = view(s); return f"{ARROW[v]} {v}" + (f" ({strength(s)})" if v != 'Neutral' else '')
+
+def pill(d, small=False, suffix=''):
+    w = WORD[d]; fs = '12px' if small else '14px'
+    return (f"<span style='background:{LIGHT[w]};color:{DARK[w]};padding:2px 10px;border-radius:12px;font-weight:600;"
+            f"font-size:{fs};white-space:nowrap'>{ARROW[w]} {w}{suffix}</span>")
+
+
+def books_line(bv):
+    return ' '.join(f"<span title='{BOOK[k]}' style='font-size:12px;color:{DARK[WORD[bv[k]]]};white-space:nowrap'>B{k} {ARROW[WORD[bv[k]]]}</span>"
+                    for k in (1, 2, 3))
+
+
+def past(t, hz, d):
+    r = C.record(t, hz, 'final', d)
+    if not r: return "<span style='color:#a0aec0;font-size:12px'>no price history to check</span>"
+    return f"<span style='color:#4a5568;font-size:12px'>such calls right {r['p']:.0%} of {r['n']:,} past times · {r['label']}</span>"
+
+
+def cell(d): w = WORD[d]; return f"{ARROW[w]} {w}"
 def board_style(val):
-    for k in LIGHT:
-        if isinstance(val, str) and k in val: return f'background-color:{LIGHT[k]};color:{DARK[k]};font-weight:600'
+    for k in ('No rule', 'Up', 'Down', 'Neutral'):
+        if isinstance(val, str) and val.endswith(k): return f'background-color:{LIGHT[k]};color:{DARK[k]};font-weight:600'
     return ''
 
-# ---------------------------------------------------------------- settings (kept in About → Advanced)
+
+# ---------------------------------------------------------------- settings
 ss = st.session_state
-ss.setdefault('exch', 'NSE/BSE Mumbai'); ss.setdefault('thr', 0.15)
+ss.setdefault('exch', 'NSE/BSE Mumbai'); ss.setdefault('birth', None)
 ss.setdefault('mu', json.loads((HERE / 'data' / 'muhurat.json').read_text()) if (HERE / 'data' / 'muhurat.json').exists() else [])
-E.THRESH = ss['thr']
+
 
 @st.cache_resource(show_spinner=False)
-def get_engine(exch, mu):
-    return E.Engine(exch, muhurat=[(date.fromisoformat(a), float(b)) for a, b in mu])
-eng = get_engine(ss['exch'], tuple(map(tuple, ss['mu'])))
+def get_engine(exch, mu, birth):
+    return E.Engine(exch, muhurat=[(date.fromisoformat(a), float(b)) for a, b in mu], birth_nak=birth)
+eng = get_engine(ss['exch'], tuple(map(tuple, ss['mu'])), ss['birth'])
+FKEY = (ss['exch'], tuple(map(tuple, ss['mu'])), ss['birth'])
+
 
 @st.cache_data(show_spinner=False, max_entries=8)
 def frame(start: date, end: date, _key):
     return eng.frame(start, end)
-FKEY = (ss['exch'], tuple(map(tuple, ss['mu'])))
+
 
 def next_session(d):
     while d.weekday() >= 5: d += timedelta(days=1)
     return d
-TARGETS = ['NIFTY'] + E.SECTORS + E.COMMODITIES
-NAME = E.TARGET_NAME
-
-def run_info(F, t, d, hz='long'):
-    """Since when the current call has held, and when it next changes (from the stabilised series)."""
-    s = F[(t, hz)]; calls = s.map(view); ts = pd.Timestamp(d)
-    if ts not in calls.index: return None, None
-    cur = calls.loc[ts]
-    before = calls.loc[:ts][::-1]; ch = before[before != cur]
-    since = before.index[0] if ch.empty else calls.loc[ch.index[0]:].index[1]
-    after = calls.loc[ts:]; ch2 = after[after != cur]
-    nxt = None if ch2.empty else ch2.index[0]
-    return since.date(), (nxt.date() if nxt is not None else None)
+TARGETS = E.TARGETS; NAME = E.TARGET_NAME
 
 # ---------------------------------------------------------------- navigation
 st.sidebar.markdown('## 🪐 AstroMarket')
-page = st.sidebar.radio('Go to', ['Today', 'Month view', '12-month outlook', 'Look ahead', 'Scorecard', 'About & settings'], label_visibility='collapsed')
+page = st.sidebar.radio('Go to', ['Today', 'Month view', '12-month outlook', 'Look ahead', 'Scorecard', 'The books & rules'], label_visibility='collapsed')
 st.sidebar.markdown('---')
-st.sidebar.caption('**Colours everywhere:** ▲ green = Bullish · ◆ amber = Neutral · ▼ red = Bearish.')
-st.sidebar.caption('**Edge** tells you whether that kind of call has beaten a simple benchmark in 14 years of history. '
-                   'Only "Tradeable" or "Strong edge" calls are worth acting on; the rest is context.')
-st.sidebar.caption('New calls are logged automatically every trading morning (08:00 IST) and scored every evening (20:00 IST).')
+st.sidebar.caption('▲ green = **Up** · ◆ amber = **Neutral** · ▼ red = **Down** · · grey = no rule in the books for that case.')
+st.sidebar.caption('**B1 B2 B3** = what each of the three books says. The headline call is the books\' majority; when one book says Up and another Down the headline is Neutral and marked ⚖️.')
+st.sidebar.caption('Calls are logged automatically every trading morning (08:00 IST) and checked every evening (20:00 IST).')
 
 # ================================================================= TODAY
 if page == 'Today':
     c0, c1 = st.columns([3, 1])
     d = c1.date_input('Date', next_session(date.today()), label_visibility='collapsed')
     c0.title(f"{d:%A, %d %B %Y}")
-    v = eng.view(d)
-    F = frame(d - timedelta(days=270), d + timedelta(days=270), FKEY)
+    r = eng.day(d)
 
     st.markdown('#### Market (Nifty 50)')
     cols = st.columns(3)
     for col, hz in zip(cols, E.HORIZONS):
-        s = v.scores['NIFTY'][hz]; cf = C.confidence('NIFTY', hz, s)
-        extra = ''
-        if hz != 'intraday':
-            since, nxt = run_info(F, 'NIFTY', d, hz)
-            if since: extra = f"<br><span style='font-size:12px;color:#4a5568'>holding since {since:%d %b} · next change {nxt:%d %b %Y}</span>" if nxt else \
-                              f"<br><span style='font-size:12px;color:#4a5568'>holding since {since:%d %b} · no change in the next 9 months</span>"
-        col.markdown(f"**{HZ[hz]}**<br>{pill(s)}<br>{edge_txt(cf)}{extra}", unsafe_allow_html=True, help=HZ_HELP[hz])
-    rg = v.regime
-    st.info(f"**Business-cycle backdrop:** {rg['phase']} ({rg['state'].split(' ')[0].lower()}). {rg['desc']}", icon='🧭')
-    for f in v.flags: st.caption('⚠️ ' + f)
+        f = r.final[('NIFTY', hz)]; dis = r.disagree[('NIFTY', hz)]
+        col.markdown(f"**{HZ[hz]}**<br>{pill(f, suffix=' ⚖️' if dis else '')}<br>{books_line(r.book[('NIFTY', hz)])}<br>{past('NIFTY', hz, f)}",
+                     unsafe_allow_html=True, help=HZ_HELP[hz])
 
-    st.markdown('#### Actionable calls')
-    st.caption('Only calls whose type has historically beaten the simple benchmark. Most days there are few or none — that is by design.')
+    b3 = r.b3
+    with st.container(border=True):
+        st.markdown(f"**Book 3 — Nifty today by the Ch.14 method:** {pill(b3['dir'], True)}", unsafe_allow_html=True)
+        p = b3['parts']
+        st.markdown(' · '.join(f"{p[k]['label']}: **{WORD[p[k]['dir']] if p[k]['dir'] is not None else 'not in supplied copy'}**"
+                               + (f" ({p[k]['stat'][0]}/{p[k]['stat'][1]})" if p[k].get('stat') else '') for k in ('nakshatra', 'yoga', 'tithi', 'moon_sign')))
+        st.caption(f"Moon {b3['avastha']} avasthā · aspects on the Moon: {', '.join(ac.EN[a] for a in b3['aspects']) or 'none'}")
+        for s_ in b3['steps']: st.markdown(f"- {s_}")
+        for k in p:
+            if p[k].get('note'): st.caption(f"{p[k]['label']}: {p[k]['note']}")
+    b2 = r.b2
+    with st.container(border=True):
+        up = [v for v in b2['votes'] if v['targets'] == 'ALL' and v['dir'] > 0]; dn = [v for v in b2['votes'] if v['targets'] == 'ALL' and v['dir'] < 0]
+        st.markdown(f"**Book 2 — the day's muhurta:** {pill(r.book[('NIFTY', 'intraday')][2], True)} &nbsp; "
+                    f"{len(up)} auspicious · {len(dn)} inauspicious factors &nbsp; <span style='color:#4a5568;font-size:13px'>"
+                    f"{b2['weekday']} · {b2['tithi']} · {b2['nakshatra']} · {b2['yoga']} yoga · {b2['karana']} karana · {b2['month']} month</span>",
+                    unsafe_allow_html=True)
+        cA, cB = st.columns(2)
+        cA.markdown('\n'.join(f"- 🟢 {v['text']} *({v['factor']})*" for v in up) or '—')
+        cB.markdown('\n'.join(f"- 🔴 {v['text']} *({v['factor']})*" for v in dn) or '—')
+        for v in b2['votes']:
+            if v['dir'] == 0 and v['targets'] == 'ALL': st.caption(f"◆ {v['text']} ({v['factor']})")
+        for n in b2['notes']: st.caption('ℹ️ ' + n)
+    if r.reversal:
+        st.warning('**Book 2 Ch.34 — trend-reversal window:** ' + '; '.join(x['text'] for x in r.reversal)
+                   + '. The book enters on a buying-nakshatra day after a down-trend, or a selling-nakshatra day after an up-trend.', icon='🔄')
+    rg = r.regime
+    st.info(f"**Book 1 business cycle:** {rg['phase']} — {'active (Jupiter aspects Saturn)' if rg['active'] else 'not active (Jupiter does not aspect Saturn)'}. "
+            f"{rg['desc']} {rg['detail']}", icon='🧭')
+    for f in r.flags: st.caption('⚠️ ' + f)
+
+    st.markdown('#### Timing inside the session')
+    o, cl = r.open_dt, r.close_dt
     rows = []
-    for hz in E.HORIZONS:
-        for t in TR.TRACKABLE:
-            if t == 'NIFTY': continue
-            s = v.scores[t][hz]; cf = C.confidence(t, hz, s)
-            if C.actionable(cf):
-                em = C.expected_move(t, hz, s)
-                rows.append((hz, t, s, cf, em))
-    if not rows:
-        st.success('No sector or commodity call has a proven edge today. Use the board below as context only.', icon='🧘')
-    for hz, t, s, cf, em in sorted(rows, key=lambda x: -x[3]['p']):
-        mv = f"Typical move after such calls: {em['mean'] * 100:+.2f}% (up {em['up']:.0%} of the time)" if em else ''
-        st.markdown(f"**{NAME[t]}** · {HZ[hz]} &nbsp; {pill(s)} &nbsp; {edge_txt(cf)}<br><span style='font-size:12px;color:#4a5568'>{mv}</span>", unsafe_allow_html=True)
-
-    st.markdown('#### Best timing in the session')
-    st.caption('Planetary hours (horā). A buying hour favours entries in the listed groups; a selling hour favours exits / shorts. Timing only — it does not set direction.')
-    for h in v.hora:
-        if h['signal'] == 'neutral': continue
-        bias = 'Buying hour' if 'BUY' in h['signal'] else 'Selling hour'
-        names = [NAME[x] for x in h['targets'] if x in NAME][:5]
-        colr = GREEN if bias == 'Buying hour' else RED
-        st.markdown(f"<span style='font-family:monospace'>{h['start']:%H:%M}–{h['end']:%H:%M}</span> &nbsp; <b style='color:{colr}'>{bias}</b> "
-                    f"({ac.EN[h['lord']]} hour) — {', '.join(names)}", unsafe_allow_html=True)
+    for w in r.windows:
+        if w['end'] <= o or w['start'] >= cl: continue
+        if w['kind'].startswith(('Gouri', 'Chaughadia', 'Hora')) and w['dir'] == 0: continue
+        rows.append(dict(From=max(w['start'], o).strftime('%H:%M'), To=min(w['end'], cl).strftime('%H:%M'), Window=w['kind'],
+                         Meaning=('Buy-side' if w['dir'] > 0 else 'Avoid buying / sell-side' if w['dir'] < 0 else 'Neutral'), Source='Book 2 ' + w['text']))
+    for h in r.hora:
+        if h['dir'] == 0: continue
+        rows.append(dict(From=h['start'].strftime('%H:%M'), To=h['end'].strftime('%H:%M'), Window=f"Hora: {ac.EN[h['lord']]} (Book 1)",
+                         Meaning=('Buy-side' if h['dir'] > 0 else 'Avoid buying / sell-side') + ' for ' + ', '.join(NAME.get(x, x) for x in h['targets'][:4]),
+                         Source=f"Book 1 Ch.10 — {h['why']}"))
+    T = pd.DataFrame(rows).sort_values(['From', 'Window']) if rows else pd.DataFrame()
+    if len(T):
+        st.dataframe(T.style.map(lambda v: f"color:{GREEN};font-weight:600" if str(v).startswith('Buy') else f"color:{RED};font-weight:600" if str(v).startswith('Avoid') else '', subset=['Meaning']),
+                     hide_index=True, width='stretch', height=min(600, 40 + 35 * len(T)))
+    st.caption('Timing windows say when to act on a call; they do not change the day\'s direction. Book 1 and Book 2 read the planetary hours differently (see "The books & rules").')
 
     st.markdown('#### All sectors & commodities')
-    show_scores = st.toggle('Show numeric scores (−1 … +1)', False)
     tab = []
     for t in TARGETS:
-        r = dict(Name=NAME[t])
+        row = dict(Name=NAME[t])
         for hz in E.HORIZONS:
-            s = v.scores[t][hz]; r[HZ[hz]] = f"{cell_text(s)}" + (f"  {s:+.2f}" if show_scores else '')
-        since, nxt = run_info(F, t, d, 'long')
-        r['2-month view since'] = f'{since:%d %b %Y}' if since else ''
-        r['Next change'] = f'{nxt:%d %b %Y}' if nxt else '> 9 months'
-        cf = C.confidence(t, 'long', v.scores[t]['long'])
-        r['Edge (2-month)'] = EDGE[cf['tier'] if cf else None][0]
-        tab.append(r)
+            f = r.final[(t, hz)]; row[HZ[hz]] = ('⚖️ ' if r.disagree[(t, hz)] else '') + cell(f)
+            bv = r.book[(t, hz)]
+            row[f'{HZ[hz]} B1·B2·B3'] = ' '.join(ARROW[WORD[bv[k]]] for k in (1, 2, 3))
+        tab.append(row)
     st.dataframe(pd.DataFrame(tab).style.map(board_style, subset=list(HZ.values())), width='stretch', height=760, hide_index=True)
 
-    with st.expander('Why? — see the drivers behind any call'):
-        t = st.selectbox('Pick a sector or commodity', TARGETS, format_func=lambda x: NAME[x])
+    with st.expander('Why? — every rule behind any call'):
+        t = st.selectbox('Pick a market', TARGETS, format_func=lambda x: NAME[x])
         for hz in E.HORIZONS:
-            cs = sorted((c for c in v.raw_contrib(t) if c.horizon == hz) if hasattr(v, 'raw_contrib') else (c for c in v.contrib.get(t, []) if c.horizon == hz), key=lambda c: -abs(c.value))[:5]
-            st.markdown(f"**{HZ[hz]}** — {cell_text(v.scores[t][hz])}")
-            for c in cs:
-                st.markdown(f"- {'🟢' if c.value > 0 else '🔴'} {c.text}")
-            if hz != 'intraday': st.caption('Shown for this day; the displayed view averages these readings over the coming sessions.')
-    with st.expander('Sky today'):
-        cm = v.chart_mid
-        st.caption(f"Moon in {ac.NAK[cm.moon_nak]} nakshatra · tithi {cm.tithi} ({'waxing' if cm.waxing else 'waning'}) · market-open ascendant {ac.fmt_deg(v.chart_open.asc)}")
+            st.markdown(f"**{HZ[hz]}** — {pill(r.final[(t, hz)], True)} &nbsp; {books_line(r.book[(t, hz)])}", unsafe_allow_html=True)
+            vs = r.votes(t, hz)
+            if not vs: st.caption('No rule in the three books applies to this market on this horizon today.')
+            for v in vs:
+                st.markdown(f"- {'🟢' if v['dir'] > 0 else '🔴' if v['dir'] < 0 else '◆'} **B{v['book']} {v['chapter']}** — {v['text']}")
+    with st.expander('Sky at the opening bell'):
+        cm = r.chart_open
+        st.caption(f"Moon in {ac.NAK[cm.moon_nak]} · {ac.tithi_name(cm.tithi)} · opening-bell ascendant {ac.fmt_deg(cm.asc)}")
         st.dataframe(pd.DataFrame([dict(Planet=f"{ac.EN[g]} ({ac.NAMES[g]})", Sign=ac.fmt_deg(cm[g].lon), Nakshatra=ac.NAK[cm[g].nak],
-                                         Motion='retrograde' if cm[g].retro else '', Strength=ac.dignity(g, cm[g].sign)[0]) for g in ac.GRAHAS]),
-                     hide_index=True, width='stretch')
+                                         Avastha=ac.avastha(cm[g].lon), Motion='retrograde' if cm[g].retro else '', Dignity=ac.dignity(g, cm[g].sign)[0])
+                                    for g in ac.GRAHAS]), hide_index=True, width='stretch')
 
 # ================================================================= MONTH VIEW
 elif page == 'Month view':
     st.title('Month view')
-    st.caption('One box per day for every sector and commodity. Green = Bullish, amber = Neutral, red = Bearish; faded = weekend. Hover a box for details.')
+    st.caption('One box per day for every market. Green = Up, amber = Neutral, red = Down, grey = no rule; faded = weekend. Hover a box for details.')
     c1, c2 = st.columns([1, 2])
     m0 = c1.date_input('Month', date.today().replace(day=1)).replace(day=1)
-    hz = c2.radio('Which view', ['intraday', 'short', 'long'], format_func=lambda x: {'intraday': "That day's trading bias", 'short': 'Next-week view', 'long': 'Next-2-month view'}[x], horizontal=True)
+    hz = c2.radio('Horizon', E.HORIZONS, format_func=lambda x: HZ[x], horizontal=True)
     end = (m0 + timedelta(days=32)).replace(day=1) - timedelta(days=1)
     days = [m0 + timedelta(days=i) for i in range((end - m0).days + 1)]
-    F = frame(m0, end, FKEY)
+    with st.spinner('Reading the month…'):
+        F = frame(m0, end, FKEY)
+
     def grid(targets):
         head = ''.join(f"<th style='font-size:10px;padding:1px;color:{'#bbb' if d.weekday() >= 5 else '#333'}'>{d.day}<br>{'MTWTFSS'[d.weekday()]}</th>" for d in days)
         body = []
@@ -184,8 +194,8 @@ elif page == 'Month view':
             for d in days:
                 if d.weekday() >= 5:
                     cells.append("<td style='background:#f1f1f1;width:20px;height:18px'></td>"); continue
-                s = F.loc[pd.Timestamp(d), (t, hz)]; w = view(s)
-                cells.append(f"<td title='{NAME[t]} · {d:%a %d %b}: {w} ({s:+.2f})' style='background:{DARK[w]};width:20px;height:18px'></td>")
+                v = F.loc[pd.Timestamp(d), (t, hz)]; w = WORD[None if pd.isna(v) else int(v)]
+                cells.append(f"<td title='{NAME[t]} · {d:%a %d %b}: {w}' style='background:{DARK[w]};width:20px;height:18px'></td>")
             body.append(f"<tr><td style='font-size:12px;white-space:nowrap;padding-right:8px'>{NAME[t]}</td>{''.join(cells)}</tr>")
         return f"<div style='overflow-x:auto'><table style='border-collapse:separate;border-spacing:2px'><tr><th></th>{head}</tr>{''.join(body)}</table></div>"
     st.markdown('**Market & sectors**'); st.markdown(grid(['NIFTY'] + E.SECTORS), unsafe_allow_html=True)
@@ -194,7 +204,7 @@ elif page == 'Month view':
     ev = []
     for g in ['Su', 'Ma', 'Me', 'Ju', 'Ve', 'Sa', 'Ra']:
         for tt, a, b in ac.find_ingresses(g, m0 - timedelta(days=1), end):
-            if m0 <= tt.date() <= end: ev.append((tt.date(), f'{ac.EN[g]} moves into {ac.RASI_EN[b]} ({ac.RASI[b]})'))
+            if m0 <= tt.date() <= end: ev.append((tt.date(), f'{ac.EN[g]} moves into {ac.RASI_EN[b]} — Book 2 reversal window ±5 days'))
     prev = None
     for d in days:
         c = ac.chart(datetime(d.year, d.month, d.day, 6, tzinfo=ac.timezone.utc)); rs = {g: c[g].retro for g in ['Me', 'Ve', 'Ma', 'Ju', 'Sa']}
@@ -202,11 +212,10 @@ elif page == 'Month view':
             for g in rs:
                 if rs[g] != prev[g]: ev.append((d, f"{ac.EN[g]} turns {'retrograde' if rs[g] else 'direct'}"))
         prev = rs
-    for k, tjd in ac.eclipses_in_year(m0.year):
-        dd = ac.from_jd(tjd).date()
-        if m0 <= dd <= end: ev.append((dd, f'{k.title()} eclipse'))
+    for k, mx in ac.eclipse_times(m0.year):
+        if m0 <= mx.astimezone(ac.IST).date() <= end: ev.append((mx.astimezone(ac.IST).date(), f'{k.title()} eclipse — Book 2: no buying ±3 days'))
     for dd, e in sorted(ev): st.markdown(f"- **{dd:%a %d %b}** — {e}")
-    if not ev: st.caption('No major sign changes or stations this month.')
+    if not ev: st.caption('No sign changes, stations or eclipses this month.')
 
 # ================================================================= 12-MONTH OUTLOOK
 elif page == '12-month outlook':
@@ -215,174 +224,168 @@ elif page == '12-month outlook':
     e0 = (s0 + timedelta(days=366)).replace(day=1) - timedelta(days=1)
     with st.spinner('Working through 12 months of planetary positions…'):
         F = frame(s0, e0, FKEY)
-    st.markdown('#### How long each 2-month view lasts')
-    st.caption('Each bar is a stretch of time with the same next-2-month view. Long views change only on slow-planet events, so bars usually run for weeks or months.')
+    hz = st.radio('Horizon', ['long', 'short', 'intraday'], format_func=lambda x: HZ[x], horizontal=True)
+    st.markdown('#### Daily calls across the year')
+    st.caption('Each stripe is one trading day — exactly the books\' call for that day. Long stretches of one colour mean the deciding planets stay put; '
+               'frequent changes mean a fast planet (often the Moon) is part of the rule.')
     pick = st.multiselect('Show', TARGETS, default=['NIFTY', 'BANK', 'IT', 'OILGAS', 'PHARMA', 'METAL', 'FMCG', 'AUTO', 'REALTY', 'GOLD', 'SILVER', 'CRUDE'], format_func=lambda x: NAME[x])
     segs = []
     for t in pick:
-        calls = F[(t, 'long')].map(view); start = calls.index[0]; cur = calls.iloc[0]
+        calls = F[(t, hz)].map(lambda v: WORD[None if pd.isna(v) else int(v)]); start = calls.index[0]; cur = calls.iloc[0]
         for ts, w in calls.items():
-            if w != cur:
-                segs.append(dict(Target=NAME[t], Start=start, End=ts, View=cur)); start, cur = ts, w
-        segs.append(dict(Target=NAME[t], Start=start, End=calls.index[-1] + pd.Timedelta(days=1), View=cur))
+            if w != cur: segs.append(dict(Market=NAME[t], Start=start, End=ts, Call=cur)); start, cur = ts, w
+        segs.append(dict(Market=NAME[t], Start=start, End=calls.index[-1] + pd.Timedelta(days=1), Call=cur))
     if segs:
         G = pd.DataFrame(segs)
-        fig = px.timeline(G, x_start='Start', x_end='End', y='Target', color='View', color_discrete_map=DARK,
-                          category_orders={'Target': [NAME[t] for t in pick], 'View': ['Bullish', 'Neutral', 'Bearish']})
+        fig = px.timeline(G, x_start='Start', x_end='End', y='Market', color='Call', color_discrete_map=DARK,
+                          category_orders={'Market': [NAME[t] for t in pick], 'Call': ['Up', 'Neutral', 'Down', 'No rule']})
         fig.update_layout(height=60 + 28 * len(pick), margin=dict(l=0, r=0, t=10, b=0), legend_title_text='')
         st.plotly_chart(fig, width='stretch')
-    st.markdown('#### Month-by-month heat-map')
-    hz = st.radio('View', ['long', 'short', 'intraday'], format_func=lambda x: {'long': 'Next-2-month view', 'short': 'Next-week view', 'intraday': 'Daily trading bias'}[x], horizontal=True)
+    st.markdown('#### Month by month — share of trading days Up vs Down')
     M = F.xs(hz, axis=1, level=1).copy(); M.index = pd.to_datetime(M.index)
-    avg = M.resample('MS').mean().T.reindex(TARGETS); avg.index = [NAME[t] for t in avg.index]; avg.columns = [c.strftime('%b %y') for c in avg.columns]
-    lab = avg.map(lambda s: f"{ARROW[view(s)]}")
-    fig = go.Figure(go.Heatmap(z=avg.values, x=avg.columns, y=avg.index, zmin=-0.7, zmax=0.7, text=lab.values, texttemplate='%{text}',
-                               colorscale=[[0, RED], [0.39, '#f6ad55'], [0.5, '#fefcbf'], [0.61, '#9ae6b4'], [1, GREEN]],
-                               colorbar=dict(title='Bearish ⟵ ⟶ Bullish', tickvals=[-0.6, 0, 0.6], ticktext=['Bearish', 'Neutral', 'Bullish']),
-                               hovertemplate='%{y} · %{x}: %{z:+.2f}<extra></extra>'))
-    fig.update_layout(height=1050, margin=dict(l=0, r=0, t=10, b=0), yaxis_autorange='reversed')
+    up = (M == 1).resample('MS').mean(); dn = (M == -1).resample('MS').mean()
+    net = (up - dn).T.reindex(TARGETS)
+    lab = pd.DataFrame({c: [f"▲{u:.0%} ▼{v:.0%}" for u, v in zip(up[c], dn[c])] for c in up.columns}, index=up.index).T.reindex(TARGETS)
+    net.index = [NAME[t] for t in net.index]; net.columns = [c.strftime('%b %y') for c in net.columns]
+    fig = go.Figure(go.Heatmap(z=net.values, x=net.columns, y=net.index, zmin=-1, zmax=1, text=lab.values, texttemplate='%{text}', textfont=dict(size=9),
+                               colorscale=[[0, RED], [0.4, '#f6ad55'], [0.5, '#fefcbf'], [0.6, '#9ae6b4'], [1, GREEN]],
+                               colorbar=dict(title='more Down ⟵ ⟶ more Up', tickvals=[-1, 0, 1], ticktext=['all Down', 'balanced', 'all Up']),
+                               hovertemplate='%{y} · %{x}: %{text}<extra></extra>'))
+    fig.update_layout(height=1100, margin=dict(l=0, r=0, t=10, b=0), yaxis_autorange='reversed')
     st.plotly_chart(fig, width='stretch')
-    st.markdown('#### Business-cycle backdrop by month')
+    st.markdown('#### Book 1 business cycle by month')
     rows = []
     for m in pd.date_range(s0, e0, freq='MS'):
-        r = eng.raw(m.date() + timedelta(days=14)); rows.append(dict(Month=m.strftime('%b %Y'), Phase=r.regime['phase'], Status=r.regime['state'].split(' ')[0].title()))
+        rr = eng.day(next_session(m.date() + timedelta(days=14)))
+        rows.append(dict(Month=m.strftime('%b %Y'), Phase=rr.regime['phase'], Active='yes' if rr.regime['active'] else 'no', Detail=rr.regime['detail']))
     st.dataframe(pd.DataFrame(rows), hide_index=True, width='stretch')
 
 # ================================================================= LOOK AHEAD
 elif page == 'Look ahead':
     st.title('Look ahead')
-    st.caption('Pick a future date or month to see the call, how often that kind of call has been right, and the typical move that followed it in the past.')
+    st.caption('Pick a future date or month to see what the books say and how often such calls have been right in the past.')
     c1, c2 = st.columns(2)
     mode = c1.radio('Look at', ['A date', 'A month'], horizontal=True)
-    t = c2.selectbox('Sector or commodity', TARGETS, format_func=lambda x: NAME[x])
+    t = c2.selectbox('Market', TARGETS, format_func=lambda x: NAME[x])
     if mode == 'A date':
         d = st.date_input('Date', next_session(date.today() + timedelta(days=30)))
-        v = eng.view(d)
+        r = eng.day(d)
         cols = st.columns(3)
         for col, hz in zip(cols, E.HORIZONS):
-            s = v.scores[t][hz]; cf = C.confidence(t, hz, s); em = C.expected_move(t, hz, s)
-            mv = (f"<br><span style='font-size:13px'>Typical move afterwards: <b>{em['mean'] * 100:+.2f}%</b> "
-                  f"(middle half of outcomes {em['p25'] * 100:+.1f}% to {em['p75'] * 100:+.1f}%; normal average {em['all_mean'] * 100:+.2f}%)</span>") if em else ''
-            col.markdown(f"**{HZ[hz]}**<br>{pill(s)}<br>{edge_txt(cf)}{mv}", unsafe_allow_html=True, help=HZ_HELP[hz])
-        st.caption('If the typical move after a call is close to the normal average, the call has added little in the past.')
+            f = r.final[(t, hz)]
+            col.markdown(f"**{HZ[hz]}**<br>{pill(f, suffix=' ⚖️' if r.disagree[(t, hz)] else '')}<br>{books_line(r.book[(t, hz)])}<br>{past(t, hz, f)}",
+                         unsafe_allow_html=True, help=HZ_HELP[hz])
+        for hz in E.HORIZONS:
+            vs = [v for v in r.votes(t, hz) if v['dir'] != 0]
+            if vs:
+                st.markdown(f"**{HZ[hz]} — rules that apply**")
+                for v in vs[:12]: st.markdown(f"- {'🟢' if v['dir'] > 0 else '🔴'} B{v['book']} {v['chapter']} — {v['text']}")
     else:
         m = st.date_input('Month', (date.today().replace(day=1) + timedelta(days=32)).replace(day=1)).replace(day=1)
         e = (m + timedelta(days=32)).replace(day=1) - timedelta(days=1)
         F = frame(m, e, FKEY)
-        df = pd.DataFrame({HZ[hz]: F[(t, hz)] for hz in E.HORIZONS})
-        fig = go.Figure()
-        for col, c in zip(df.columns, ['#805ad5', '#3182ce', '#1a202c']):
-            fig.add_trace(go.Scatter(x=df.index, y=df[col], name=col, line=dict(color=c, width=3 if col == 'Next 2 months' else 1.6)))
-        fig.add_hrect(y0=-E.THRESH, y1=E.THRESH, fillcolor=AMBER, opacity=0.12, line_width=0, annotation_text='Neutral zone', annotation_position='top left')
-        fig.update_layout(height=360, yaxis=dict(range=[-1, 1], tickvals=[-0.8, 0, 0.8], ticktext=['Bearish', 'Neutral', 'Bullish']), margin=dict(l=0, r=0, t=10, b=0))
-        st.plotly_chart(fig, width='stretch')
-        c = st.columns(3)
-        for col, hz in zip(c, E.HORIZONS):
-            w = F[(t, hz)].map(view).value_counts(normalize=True)
-            col.markdown(f"**{HZ[hz]}** — ▲ {w.get('Bullish', 0):.0%} of days · ◆ {w.get('Neutral', 0):.0%} · ▼ {w.get('Bearish', 0):.0%}")
+        for hz in E.HORIZONS:
+            s = F[(t, hz)]
+            n = s.notna().sum() or 1
+            st.markdown(f"**{HZ[hz]}** — ▲ Up {(s == 1).sum() / n:.0%} of trading days · ◆ Neutral {(s == 0).sum() / n:.0%} · ▼ Down {(s == -1).sum() / n:.0%}")
+            st.markdown(' '.join(f"<span title='{ix:%a %d %b}: {WORD[None if pd.isna(v) else int(v)]}' style='display:inline-block;width:22px;height:22px;margin:1px;"
+                                 f"background:{DARK[WORD[None if pd.isna(v) else int(v)]]};color:white;font-size:10px;text-align:center;line-height:22px'>{ix.day}</span>"
+                                 for ix, v in s.items()), unsafe_allow_html=True)
 
 # ================================================================= SCORECARD
 elif page == 'Scorecard':
     st.title('Scorecard — were the calls right?')
-    st.info('This runs by itself. Every trading morning at 08:00 IST the Nifty view and any actionable calls are logged before the market opens; '
-            'every evening at 20:00 IST they are checked against actual prices. Nothing to press. Logged calls are never edited afterwards.', icon='⚙️')
+    st.info('This runs by itself. Every trading morning at 08:00 IST the books\' call for every tracked market and horizon is logged before the open — '
+            'whatever its past accuracy; every evening at 20:00 IST it is checked against actual prices. Logged calls are never edited afterwards. '
+            'Neutral calls are logged but have no right/wrong.', icon='⚙️')
     df = TR.load()
-    incl = st.toggle('Include reconstructed history (paper record Apr–Oct 2026) for context', value=not (df['mode'] == 'live').any())
+    incl = st.toggle('Include reconstructed history (paper record) for context', value=not (df['mode'] == 'live').any())
     modes = ('live', 'paper') if incl else ('live',)
     S = TR.stats(df, modes)
     pending = int(((df.status == 'pending') & df['mode'].isin(modes)).sum())
     k = st.columns(4)
-    k[0].metric('Calls checked', f"{S.get('n', 0):,}", help='Calls whose outcome is known (neutral views are not counted).')
+    k[0].metric('Calls checked', f"{S.get('n', 0):,}", help='Up/Down calls whose outcome is known.')
     k[1].metric('Right', f"{S['hit']:.0%}" if S.get('n') else '—', help='Coin-flip = 50%.')
+    nv = None
     if S.get('n'):
         nv = sum(b['naive'] * b['n'] for b in S['by_horizon'].values()) / sum(b['n'] for b in S['by_horizon'].values())
         k[2].metric('Simple benchmark', f'{nv:.0%}', help='How often you would be right by always predicting whichever direction actually happened more often in those same windows.')
     k[3].metric('Awaiting outcome', f'{pending}')
     if S.get('n'):
-        verdict = S['hit'] - nv
-        if incl: st.caption('Figures include the reconstructed paper record; switch the toggle off to see live calls only.')
         if S['n'] < 60: st.caption('Fewer than 60 calls checked — too early to judge.')
-        elif verdict > 0.03: st.success(f"Calls are beating the benchmark by {verdict:.0%} so far.")
-        elif verdict < -0.03: st.error(f"Calls are trailing the benchmark by {-verdict:.0%} so far.")
-        else: st.warning('Calls are performing roughly in line with the benchmark — no edge yet.')
         g = TR.running(df, modes)
         fig = go.Figure(go.Scatter(x=g.date, y=g.cumulative, line=dict(color='#1a365d', width=3), name='Cumulative % right'))
         fig.add_hline(y=0.5, line_dash='dot', annotation_text='coin-flip'); fig.add_hline(y=nv, line_dash='dash', line_color=AMBER, annotation_text='benchmark')
         fig.update_layout(height=300, yaxis_tickformat='.0%', yaxis_range=[0.2, 0.8], margin=dict(l=0, r=0, t=10, b=0))
         st.plotly_chart(fig, width='stretch')
-        bh = pd.DataFrame([dict(Horizon=HZ[h], Checked=b['n'], Right=f"{b['hit']:.0%}", Benchmark=f"{b['naive']:.0%}") for h, b in S['by_horizon'].items()])
-        st.dataframe(bh, hide_index=True, width='stretch')
+        a, b = st.columns(2)
+        a.dataframe(pd.DataFrame([dict(Horizon=HZ[h], Checked=x['n'], Right=f"{x['hit']:.0%}", Benchmark=f"{x['naive']:.0%}") for h, x in S['by_horizon'].items()]), hide_index=True, width='stretch')
+        b.dataframe(pd.DataFrame([dict(Book=BOOK[int(k_[-1])], Checked=x['n'], Right=f"{x['hit']:.0%}") for k_, x in S.get('by_book', {}).items()]), hide_index=True, width='stretch')
     st.markdown('#### Recent calls')
-    sub = df[df['mode'].isin(modes + ('late',))].sort_values(['date', 'horizon'], ascending=[False, True]).head(300).copy()
+    sub = df[df['mode'].isin(modes + ('late',))].sort_values(['date', 'horizon'], ascending=[False, True]).head(400).copy()
     if sub.empty:
         st.caption('The first live calls appear after the next 08:00 IST run.')
     else:
         def res(r):
             if r['mode'] == 'late': return '⚪ logged late — not counted'
+            if r['status'] == 'no call': return '— neutral / no rule'
             if r['status'] == 'pending': return f"⏳ result on {(r['date'] + pd.tseries.offsets.BDay(TR.HZ_SESSIONS[r['horizon']] - 1)):%d %b}"
             if r['status'] != 'scored': return '— market closed'
-            return ('✅ right' if r['correct'] == 1 else '❌ wrong') + f" (actual {r['actual_ret'] * 100:+.2f}%)"
+            return ('✅ right' if r['correct'] == 1 else '❌ wrong' if r['correct'] == 0 else '— flat') + f" (actual {r['actual_ret'] * 100:+.2f}%)"
         sub['Result'] = sub.apply(res, axis=1)
-        sub['Call'] = sub.apply(lambda r: f"{ARROW.get(r['view'], '')} {r['view']}", axis=1)
-        out = sub[['date', 'name', 'horizon', 'Call', 'tier', 'Result']].rename(columns={'date': 'Date', 'name': 'Sector / commodity', 'horizon': 'Horizon', 'tier': 'Edge'})
-        out['Horizon'] = out['Horizon'].map(HZ); out['Edge'] = out['Edge'].map(lambda x: EDGE.get(x, (x,))[0] if isinstance(x, str) else '—')
-        out['Date'] = out['Date'].dt.strftime('%d %b %Y')
+        sub['Call'] = sub['view'].map(lambda v: f"{ARROW.get(v, '')} {v}")
+        sub['Books'] = sub.apply(lambda r: f"{ARROW.get(r['book1'], '·')} {ARROW.get(r['book2'], '·')} {ARROW.get(r['book3'], '·')}", axis=1)
+        out = sub[['date', 'name', 'horizon', 'Call', 'Books', 'Result']].rename(columns={'date': 'Date', 'name': 'Market', 'horizon': 'Horizon', 'Books': 'B1 B2 B3'})
+        out['Horizon'] = out['Horizon'].map(HZ); out['Date'] = out['Date'].dt.strftime('%d %b %Y')
         st.dataframe(out.style.map(board_style, subset=['Call']), hide_index=True, width='stretch', height=520)
         st.download_button('Download full log (CSV)', TR.LOG.read_bytes(), 'astro_predictions.csv')
-    with st.expander('Manual controls — only needed if you run the app on your own computer'):
-        c1, c2 = st.columns(2)
-        dd = c1.date_input('Log calls for', next_session(date.today()))
-        if c1.button('Log calls now'):
-            st.success(f'{TR.log_predictions(eng, dd, mode="live")} calls logged.')
-        if c2.button('Check outcomes now'):
-            with st.spinner('Fetching prices…'): st.success(f'{TR.settle()} calls checked.')
 
-# ================================================================= ABOUT & SETTINGS
+# ================================================================= BOOKS & RULES
 else:
-    st.title('About & settings')
+    st.title('The books & rules')
     st.markdown('''
-**What this does, in five steps**
-1. Works out where every planet is (sign, nakshatra, retrograde, aspects) for each trading day and for the market's opening moment.
-2. Applies the rule set: each rule says which sectors or commodities are helped or hurt by a given planetary condition.
-3. Adds the rules up into a score for each sector / commodity on three horizons — *Today*, *Next week*, *Next 2 months* — and labels it **Bullish**, **Neutral** or **Bearish**.
-4. Checks every kind of call against 14 years of real prices and tells you whether it has a proven **edge**.
-5. Logs the worthwhile calls each morning and checks them each evening, so you build an honest track record.
+The app applies only the rules of three books by Indrodeep Banerjee, as written:
 
-**Reading the labels**
-- ▲ **Bullish** / ◆ **Neutral** / ▼ **Bearish** — direction. *Mild / Moderate / Strong* — how many rules agree.
-- **Edge** — *Strong edge* or *Tradeable* = that kind of call beat both a coin-flip and the simple benchmark on enough independent past occurrences. *No proven edge* = it hasn't. *Too little history* = not enough data to say.
-- **Next 2 months** views are averaged over the coming 40 sessions, so they change only on slow-planet events (Jupiter/Saturn/Rahu sign changes, stations, major aspects). The *Today* board shows when each one started and when it is next expected to change.
+| | Book | What it drives in the app |
+|---|---|---|
+| **B1** | *Stock Market Astrology* (2009) | Sectors and commodities on all three horizons; Nifty long-term via the business cycle (Ch.16) and Dīpāvali Muhurat (Ch.19); planetary-hour timing (Ch.10) |
+| **B2** | *Investment Muhurtas* (2014) | The day's muhurta for the market and every sector (the book: *markets pick up on auspicious days and turn bearish on inauspicious days*); Rahu Kalam, Yamakandam, Gulika, Gouri, Chaughadia, Durmuhurta, Abhijit, horā timing; trend-reversal windows (Ch.34) |
+| **B3** | *Predicting the Nifty & Sensex* | Nifty today by the book's own Ch.14 method (nakshatra, yoga, tithi and Moon-sign tables for the Sun's sign, Moon aspects and avasthā); Nifty short- and long-term (Ch.1); sector short-term (Sun-transit paragraphs) |
+
+**How votes are combined** — the books never say how to merge one another, so the app uses the plainest rule: inside a book, more Up rules than Down → Up, more Down → Down, equal → Neutral; across books the same count, and if one book says Up while another says Down the call is **Neutral ⚖️**. No weights, scores or smoothing.
 ''')
+    st.markdown('#### Where the books contradict each other (or themselves)')
+    for c_ in E.CONTRA:
+        with st.expander(f"{c_['id']}. {c_['topic']} — {c_['books']}"):
+            st.markdown(c_['detail']); st.caption('In the app: ' + c_['app'])
     cal = C.cal()
-    if cal:
-        st.markdown('**What 14 years of history say (Feb 2012 – Oct 2026, NSE indices)**')
+    if cal.get('NIFTY'):
+        st.markdown('#### How the books\' calls have matched the Nifty (Feb 2012 onward)')
         rows = []
         for hz in E.HORIZONS:
-            o = cal['overall'][f'{hz}|direct']
-            rows.append(dict(Horizon=HZ[hz], Calls=f"{o['n']:,}", Right=f"{o['hit']:.1%}", Benchmark=f"{max(o['base_up'], 1 - o['base_up']):.1%}"))
+            x = cal['NIFTY'][hz]
+            for s_, nm in (('final', 'Headline call'), ('b1', 'Book 1'), ('b2', 'Book 2'), ('b3', 'Book 3')):
+                y = x.get(s_, {})
+                if y.get('n'): rows.append(dict(Horizon=HZ[hz], Source=nm, Calls=f"{y['n']:,}", Right=f"{y['p']:.1%}", Benchmark=f"{y['naive']:.1%}"))
         st.dataframe(pd.DataFrame(rows), hide_index=True, width='stretch')
-        st.caption('Overall the calls are close to a coin-flip, which is why only the handful of call types with a historical edge are flagged as actionable. '
-                   'Treat everything here as one input alongside your own analysis, never as a stand-alone signal.')
-    with st.expander('Advanced settings'):
-        ex = st.selectbox('Market location (for the opening-bell chart and planetary hours)', list(ac.EXCHANGES), index=list(ac.EXCHANGES).index(ss['exch']))
-        thr = st.slider('Neutral zone width (scores between −x and +x are Neutral)', 0.05, 0.40, float(ss['thr']), 0.01)
-        mu = st.text_area('Diwali Muhurat-session results (date, points) — sets the annual bias', '\n'.join(f'{a}, {b:g}' for a, b in ss['mu']))
+        st.caption('Shown for information only — it never changes or filters a call. Benchmark = always predicting the direction that occurred more often.')
+    with st.expander('Checks that the calculations match the books'):
+        vr = HERE / 'data' / 'validation_report.json'
+        if vr.exists():
+            v = json.loads(vr.read_text()); m = v['chosen']
+            st.write(f"Positions: {m['hard_pass']} of {m['hard_total']} dated facts from the three books reproduced. "
+                     f"Methods: {sum(t['pass_'] for t in v.get('method_tests', []))} of {len(v.get('method_tests', []))} worked examples reproduced.")
+            st.dataframe(pd.DataFrame(v['tests'] + v.get('method_tests', []))[['test', 'book', 'engine', 'pass_']].rename(
+                columns={'test': 'Check', 'book': 'Book says', 'engine': 'App computes', 'pass_': 'Match'}), hide_index=True, width='stretch')
+    with st.expander('Settings'):
+        ex = st.selectbox('Market location (opening-bell chart, sunrise-based windows)', list(ac.EXCHANGES), index=list(ac.EXCHANGES).index(ss['exch']))
+        bn = st.selectbox('Your birth nakshatra (optional — adds Book 2 Tara bala)', [None] + list(range(27)), index=0 if ss['birth'] is None else ss['birth'] + 1,
+                          format_func=lambda i: '— not set —' if i is None else ac.NAK[i])
+        mu = st.text_area('Dīpāvali Muhurat-session results (date, points) — Book 1 Ch.19 annual signal', '\n'.join(f'{a}, {b:g}' for a, b in ss['mu']))
         if st.button('Apply'):
             parsed = []
             for ln in mu.strip().splitlines():
                 try: a, b = ln.split(','); parsed.append([date.fromisoformat(a.strip()).isoformat(), float(b)])
                 except Exception: pass
-            ss['exch'], ss['thr'], ss['mu'] = ex, thr, parsed; st.cache_data.clear(); st.rerun()
+            ss['exch'], ss['mu'], ss['birth'] = ex, parsed, bn; st.cache_data.clear(); st.rerun()
         st.caption('To make a Muhurat entry permanent for the automatic daily runs, add it to data/muhurat.json in the GitHub repo.')
-    with st.expander('Downloads'):
-        wb = HERE / 'AstroMarket_Workbook.xlsx'
-        if wb.exists(): st.download_button('12-month Excel workbook', wb.read_bytes(), 'AstroMarket_Workbook.xlsx')
-        p = HERE / 'data' / 'rule_level_hitrates.csv'
-        if p.exists(): st.download_button('Every rule with its historical hit-rate (CSV)', p.read_bytes(), 'rule_hitrates.csv')
-    with st.expander('Technical detail: data checks'):
-        vr = HERE / 'data' / 'validation_report.json'
-        if vr.exists():
-            v = json.loads(vr.read_text()); m = v['chosen']
-            st.write(f"Planetary positions verified against {m['hard_total']} dated facts; all {m['hard_pass']} reproduced.")
-            st.dataframe(pd.DataFrame(v['tests'])[['test', 'book', 'engine', 'pass_']].rename(columns={'test': 'Check', 'book': 'Expected', 'engine': 'Computed', 'pass_': 'OK'}), hide_index=True, width='stretch')
-        st.caption('Prices: NSE index end-of-day data (daily), EIA crude oil and natural gas.')

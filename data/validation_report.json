@@ -1,67 +1,67 @@
 {
- "generated": "2026-10-24T23:28:44+00:00",
+ "generated": "2026-10-26T15:54:41+00:00",
  "matrix": [
   {
    "ayanamsa": "Lahiri",
    "node": "true",
-   "hard_pass": 36,
-   "hard_total": 36,
+   "hard_pass": 80,
+   "hard_total": 80,
    "soft_pass": 3,
    "soft_total": 5
   },
   {
    "ayanamsa": "Lahiri",
    "node": "mean",
-   "hard_pass": 34,
-   "hard_total": 36,
+   "hard_pass": 78,
+   "hard_total": 80,
    "soft_pass": 3,
    "soft_total": 5
   },
   {
    "ayanamsa": "Raman",
    "node": "true",
-   "hard_pass": 29,
-   "hard_total": 36,
+   "hard_pass": 52,
+   "hard_total": 80,
    "soft_pass": 3,
    "soft_total": 5
   },
   {
    "ayanamsa": "Raman",
    "node": "mean",
-   "hard_pass": 28,
-   "hard_total": 36,
+   "hard_pass": 51,
+   "hard_total": 80,
    "soft_pass": 3,
    "soft_total": 5
   },
   {
    "ayanamsa": "Krishnamurti",
    "node": "true",
-   "hard_pass": 34,
-   "hard_total": 36,
+   "hard_pass": 78,
+   "hard_total": 80,
    "soft_pass": 3,
    "soft_total": 5
   },
   {
    "ayanamsa": "Krishnamurti",
    "node": "mean",
-   "hard_pass": 34,
-   "hard_total": 36,
+   "hard_pass": 78,
+   "hard_total": 80,
    "soft_pass": 3,
    "soft_total": 5
   },
   {
    "ayanamsa": "Fagan-Bradley",
    "node": "true",
-   "hard_pass": 30,
-   "hard_total": 36,
+   "hard_pass": 72,
+   "hard_total": 80,
    "soft_pass": 3,
    "soft_total": 5
   },
   {
    "ayanamsa": "Fagan-Bradley",
    "node": "mean",
-   "hard_pass": 28,
-   "hard_total": 36,
+   "hard_pass": 70,
+   "hard_total": 80,
    "soft_pass": 3,
    "soft_total": 5
   },
@@ -69,7 +69,7 @@
    "ayanamsa": "Tropical",
    "node": "true",
    "hard_pass": 11,
-   "hard_total": 36,
+   "hard_total": 80,
    "soft_pass": 2,
    "soft_total": 5
   },
@@ -77,7 +77,7 @@
    "ayanamsa": "Tropical",
    "node": "mean",
    "hard_pass": 10,
-   "hard_total": 36,
+   "hard_total": 80,
    "soft_pass": 2,
    "soft_total": 5
   }
@@ -85,12 +85,452 @@
  "chosen": {
   "ayanamsa": "Lahiri",
   "node": "true",
-  "hard_pass": 36,
-  "hard_total": 36,
+  "hard_pass": 80,
+  "hard_total": 80,
   "soft_pass": 3,
   "soft_total": 5
  },
  "tests": [
+  {
+   "id": "B3-1",
+   "group": "Book 3 Ch.14",
+   "test": "01-Feb-2012 09:00: Moon sign, avasthā, aspects on Moon, nakshatra, yoga, tithi",
+   "book": "('Aries', 'Mrita', {'Sa', 'Ju'}, 'Kṛttikā', 'Shukla', 9)",
+   "engine": "('Aries', 'Mrita', {'Sa', 'Ju'}, 'Kṛttikā', 'Shukla', 9)",
+   "pass_": true,
+   "page": "Ch.14",
+   "hard": true
+  },
+  {
+   "id": "B3-2",
+   "group": "Book 3 Ch.14",
+   "test": "02-Feb-2012 09:00: Moon sign, avasthā, aspects on Moon, nakshatra, yoga, tithi",
+   "book": "('Taurus', 'Vriddha', {'Ra', 'Ke'}, 'Rohiṇī', 'Brahma', 10)",
+   "engine": "('Taurus', 'Vriddha', {'Ra', 'Ke'}, 'Rohiṇī', 'Brahma', 10)",
+   "pass_": true,
+   "page": "Ch.14",
+   "hard": true
+  },
+  {
+   "id": "B3-3",
+   "group": "Book 3 Ch.14",
+   "test": "03-Feb-2012 09:00: Moon sign, avasthā, aspects on Moon, nakshatra, yoga, tithi",
+   "book": "('Taurus', 'Kumar', {'Ra', 'Ke'}, 'Rohiṇī', 'Indra', 11)",
+   "engine": "('Taurus', 'Kumar', {'Ra', 'Ke'}, 'Rohiṇī', 'Indra', 11)",
+   "pass_": true,
+   "page": "Ch.14",
+   "hard": true
+  },
+  {
+   "id": "B3-4",
+   "group": "Book 3 Ch.14",
+   "test": "07-Feb-2012 09:00: Moon sign, avasthā, aspects on Moon, nakshatra, yoga, tithi",
+   "book": "('Cancer', 'Yuva', {'Sa', 'Su', 'Me'}, 'Puṣya', 'Ayushman', 15)",
+   "engine": "('Cancer', 'Yuva', {'Sa', 'Su', 'Me'}, 'Puṣya', 'Ayushman', 15)",
+   "pass_": true,
+   "page": "Ch.14",
+   "hard": true
+  },
+  {
+   "id": "B3-5",
+   "group": "Book 3 Ch.14",
+   "test": "08-Feb-2012 09:00: Moon sign, avasthā, aspects on Moon, nakshatra, yoga, tithi",
+   "book": "('Cancer', 'Baal', {'Sa', 'Su', 'Me'}, 'Aśleṣā', 'Saubhagya', 16)",
+   "engine": "('Cancer', 'Baal', {'Sa', 'Su', 'Me'}, 'Aśleṣā', 'Saubhagya', 16)",
+   "pass_": true,
+   "page": "Ch.14",
+   "hard": true
+  },
+  {
+   "id": "B3-6",
+   "group": "Book 3 Ch.14",
+   "test": "09-Feb-2012 09:00: Moon sign, avasthā, aspects on Moon, nakshatra, yoga, tithi",
+   "book": "('Leo', 'Kumar', {'Ma', 'Ju'}, 'Maghā', 'Atiganda', 17)",
+   "engine": "('Leo', 'Kumar', {'Ma', 'Ju'}, 'Maghā', 'Atiganda', 17)",
+   "pass_": true,
+   "page": "Ch.14",
+   "hard": true
+  },
+  {
+   "id": "B2-1",
+   "group": "Book 2 Ch.34",
+   "test": "Nakshatra during the session 08-07-2014",
+   "book": "Viśākhā",
+   "engine": "Viśākhā",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-2",
+   "group": "Book 2 Ch.34",
+   "test": "Nakshatra during the session 14-07-2014",
+   "book": "Śravaṇa",
+   "engine": "Dhaniṣṭhā/Śravaṇa",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-3",
+   "group": "Book 2 Ch.34",
+   "test": "Nakshatra during the session 02-05-2014",
+   "book": "Mṛgaśīrṣā",
+   "engine": "Mṛgaśīrṣā/Rohiṇī",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-4",
+   "group": "Book 2 Ch.34",
+   "test": "Nakshatra during the session 22-05-2014",
+   "book": "Śatabhiṣak",
+   "engine": "Śatabhiṣak",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-5",
+   "group": "Book 2 Ch.34",
+   "test": "Nakshatra during the session 30-05-2014",
+   "book": "Mṛgaśīrṣā",
+   "engine": "Mṛgaśīrṣā",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-6",
+   "group": "Book 2 Ch.34",
+   "test": "Nakshatra during the session 06-06-2014",
+   "book": "Pūrva Phālgunī",
+   "engine": "Pūrva Phālgunī/Uttara Phālgunī",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-7",
+   "group": "Book 2 Ch.34",
+   "test": "Nakshatra during the session 25-06-2013",
+   "book": "Uttara Aṣāḍha",
+   "engine": "Uttara Aṣāḍha",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-8",
+   "group": "Book 2 Ch.34",
+   "test": "Nakshatra during the session 01-07-2013",
+   "book": "Revatī",
+   "engine": "Revatī",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-9",
+   "group": "Book 2 Ch.34",
+   "test": "Nakshatra during the session 23-08-2013",
+   "book": "Uttara Bhādra",
+   "engine": "Uttara Bhādra",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-10",
+   "group": "Book 2 Ch.34",
+   "test": "Nakshatra during the session 13-09-2013",
+   "book": "Mūla",
+   "engine": "Mūla",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-11",
+   "group": "Book 2 Ch.34",
+   "test": "Nakshatra during the session 22-11-2013",
+   "book": "Punarvasu",
+   "engine": "Punarvasu",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-12",
+   "group": "Book 2 Ch.34",
+   "test": "Nakshatra during the session 10-12-2013",
+   "book": "Pūrva Bhādra",
+   "engine": "Pūrva Bhādra/Uttara Bhādra",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-13",
+   "group": "Book 2 Ch.34",
+   "test": "Nakshatra during the session 20-12-2013",
+   "book": "Puṣya",
+   "engine": "Puṣya",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-14",
+   "group": "Book 2 Ch.34",
+   "test": "Nakshatra during the session 07-01-2014",
+   "book": "Uttara Bhādra",
+   "engine": "Uttara Bhādra",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-15",
+   "group": "Book 2 Ch.34",
+   "test": "Nakshatra during the session 15-01-2014",
+   "book": "Ārdrā",
+   "engine": "Punarvasu/Ārdrā",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-16",
+   "group": "Book 2 Ch.34",
+   "test": "Nakshatra during the session 24-07-2013",
+   "book": "Dhaniṣṭhā",
+   "engine": "Dhaniṣṭhā",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-17",
+   "group": "Book 2 Ch.34",
+   "test": "Nakshatra during the session 06-08-2013",
+   "book": "Puṣya",
+   "engine": "Puṣya",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-D1",
+   "group": "Book 2 Ch.34",
+   "test": "Mars degree 08-07-2014",
+   "book": "27° Virgo",
+   "engine": "27.3° Virgo",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-D2",
+   "group": "Book 2 Ch.34",
+   "test": "Mars degree 14-07-2014",
+   "book": "0° Libra",
+   "engine": "0.0° Libra",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-D3",
+   "group": "Book 2 Ch.34",
+   "test": "Venus degree 14-07-2014",
+   "book": "0° Gemini",
+   "engine": "0.6° Gemini",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-D4",
+   "group": "Book 2 Ch.34",
+   "test": "Sun degree 14-07-2014",
+   "book": "27° Gemini",
+   "engine": "27.6° Gemini",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-D5",
+   "group": "Book 2 Ch.34",
+   "test": "Mercury degree 02-05-2014",
+   "book": "25° Aries",
+   "engine": "24.7° Aries",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-D6",
+   "group": "Book 2 Ch.34",
+   "test": "Mercury degree 22-05-2014",
+   "book": "29° Taurus",
+   "engine": "29.2° Taurus",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-D7",
+   "group": "Book 2 Ch.34",
+   "test": "Venus degree 22-05-2014",
+   "book": "28° Pisces",
+   "engine": "27.9° Pisces",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-D8",
+   "group": "Book 2 Ch.34",
+   "test": "Mercury degree 30-05-2014",
+   "book": "6° Gemini",
+   "engine": "6.4° Gemini",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-D9",
+   "group": "Book 2 Ch.34",
+   "test": "Jupiter degree 06-06-2014",
+   "book": "27° Gemini",
+   "engine": "27.3° Gemini",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-D10",
+   "group": "Book 2 Ch.34",
+   "test": "Mercury degree 25-06-2013",
+   "book": "29° Gemini",
+   "engine": "29.0° Gemini",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-D11",
+   "group": "Book 2 Ch.34",
+   "test": "Mars degree 01-07-2013",
+   "book": "27° Taurus",
+   "engine": "27.5° Taurus",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-D12",
+   "group": "Book 2 Ch.34",
+   "test": "Mercury degree 01-07-2013",
+   "book": "28° Gemini",
+   "engine": "28.3° Gemini",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-D13",
+   "group": "Book 2 Ch.34",
+   "test": "Mars degree 23-08-2013",
+   "book": "2° Cancer",
+   "engine": "2.8° Cancer",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-D14",
+   "group": "Book 2 Ch.34",
+   "test": "Mercury degree 23-08-2013",
+   "book": "4° Leo",
+   "engine": "4.4° Leo",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-D15",
+   "group": "Book 2 Ch.34",
+   "test": "Sun degree 13-09-2013",
+   "book": "26° Leo",
+   "engine": "26.5° Leo",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-D16",
+   "group": "Book 2 Ch.34",
+   "test": "Mars degree 22-11-2013",
+   "book": "27° Leo",
+   "engine": "27.6° Leo",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-D17",
+   "group": "Book 2 Ch.34",
+   "test": "Sun degree 10-12-2013",
+   "book": "24° Scorpio",
+   "engine": "24.2° Scorpio",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-D18",
+   "group": "Book 2 Ch.34",
+   "test": "Mercury degree 20-12-2013",
+   "book": "29° Scorpio",
+   "engine": "29.2° Scorpio",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-D19",
+   "group": "Book 2 Ch.34",
+   "test": "Venus degree 07-01-2014",
+   "book": "29° Sagittarius",
+   "engine": "29.8° Sagittarius",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-D20",
+   "group": "Book 2 Ch.34",
+   "test": "Sun degree 15-01-2014",
+   "book": "1° Capricorn",
+   "engine": "0.9° Capricorn",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
+  {
+   "id": "B2-D21",
+   "group": "Book 2 Ch.34",
+   "test": "Venus degree 06-08-2013",
+   "book": "24° Leo",
+   "engine": "23.5° Leo",
+   "pass_": true,
+   "page": "Ch.34",
+   "hard": true
+  },
   {
    "id": "T01",
    "group": "Position",
@@ -591,5 +1031,196 @@
    "29-Sep: Candra–Śani trine is listed for Śani but not for Candra (a trine is mutual)."
   ]
  },
- "swisseph_version": "2.10.03"
+ "swisseph_version": "2.10.03",
+ "method_tests": [
+  {
+   "id": "M3-1",
+   "test": "Book 3 concluded prediction 01-Feb-2012",
+   "book": "Neutral",
+   "engine": "Neutral",
+   "pass_": true
+  },
+  {
+   "id": "M3-2",
+   "test": "Book 3 concluded prediction 02-Feb-2012",
+   "book": "Up",
+   "engine": "Up",
+   "pass_": true
+  },
+  {
+   "id": "M3-3",
+   "test": "Book 3 concluded prediction 03-Feb-2012",
+   "book": "Up",
+   "engine": "Up",
+   "pass_": true
+  },
+  {
+   "id": "M3-7",
+   "test": "Book 3 concluded prediction 07-Feb-2012",
+   "book": "Neutral",
+   "engine": "Neutral",
+   "pass_": true
+  },
+  {
+   "id": "M3-8",
+   "test": "Book 3 concluded prediction 08-Feb-2012",
+   "book": "Up",
+   "engine": "Up",
+   "pass_": true
+  },
+  {
+   "id": "M3-9",
+   "test": "Book 3 concluded prediction 09-Feb-2012",
+   "book": "Up",
+   "engine": "Up",
+   "pass_": true
+  },
+  {
+   "id": "M2-20140708Ma",
+   "test": "Book 2 reversal window 08-07-2014 (Mars)",
+   "book": "reversal possible",
+   "engine": "in window",
+   "pass_": true
+  },
+  {
+   "id": "M2-20140714Ma",
+   "test": "Book 2 reversal window 14-07-2014 (Mars)",
+   "book": "reversal possible",
+   "engine": "in window",
+   "pass_": true
+  },
+  {
+   "id": "M2-20140714Ve",
+   "test": "Book 2 reversal window 14-07-2014 (Venus)",
+   "book": "reversal possible",
+   "engine": "in window",
+   "pass_": true
+  },
+  {
+   "id": "M2-20140714Su",
+   "test": "Book 2 reversal window 14-07-2014 (Sun)",
+   "book": "reversal possible",
+   "engine": "in window",
+   "pass_": true
+  },
+  {
+   "id": "M2-20140502Me",
+   "test": "Book 2 reversal window 02-05-2014 (Mercury)",
+   "book": "reversal possible",
+   "engine": "in window",
+   "pass_": true
+  },
+  {
+   "id": "M2-20140522Me",
+   "test": "Book 2 reversal window 22-05-2014 (Mercury)",
+   "book": "reversal possible",
+   "engine": "in window",
+   "pass_": true
+  },
+  {
+   "id": "M2-20140522Ve",
+   "test": "Book 2 reversal window 22-05-2014 (Venus)",
+   "book": "reversal possible",
+   "engine": "in window",
+   "pass_": true
+  },
+  {
+   "id": "M2-20140530Me",
+   "test": "Book 2 reversal window 30-05-2014 (Mercury)",
+   "book": "reversal possible",
+   "engine": "in window",
+   "pass_": true
+  },
+  {
+   "id": "M2-20140606Ju",
+   "test": "Book 2 reversal window 06-06-2014 (Jupiter)",
+   "book": "reversal possible",
+   "engine": "in window",
+   "pass_": true
+  },
+  {
+   "id": "M2-20130625Me",
+   "test": "Book 2 reversal window 25-06-2013 (Mercury)",
+   "book": "reversal possible",
+   "engine": "in window",
+   "pass_": true
+  },
+  {
+   "id": "M2-20130701Ma",
+   "test": "Book 2 reversal window 01-07-2013 (Mars)",
+   "book": "reversal possible",
+   "engine": "in window",
+   "pass_": true
+  },
+  {
+   "id": "M2-20130701Me",
+   "test": "Book 2 reversal window 01-07-2013 (Mercury)",
+   "book": "reversal possible",
+   "engine": "in window",
+   "pass_": true
+  },
+  {
+   "id": "M2-20130823Ma",
+   "test": "Book 2 reversal window 23-08-2013 (Mars)",
+   "book": "reversal possible",
+   "engine": "in window",
+   "pass_": true
+  },
+  {
+   "id": "M2-20130823Me",
+   "test": "Book 2 reversal window 23-08-2013 (Mercury)",
+   "book": "reversal possible",
+   "engine": "in window",
+   "pass_": true
+  },
+  {
+   "id": "M2-20130913Su",
+   "test": "Book 2 reversal window 13-09-2013 (Sun)",
+   "book": "reversal possible",
+   "engine": "in window",
+   "pass_": true
+  },
+  {
+   "id": "M2-20131122Ma",
+   "test": "Book 2 reversal window 22-11-2013 (Mars)",
+   "book": "reversal possible",
+   "engine": "in window",
+   "pass_": true
+  },
+  {
+   "id": "M2-20131210Su",
+   "test": "Book 2 reversal window 10-12-2013 (Sun)",
+   "book": "reversal possible",
+   "engine": "in window",
+   "pass_": true
+  },
+  {
+   "id": "M2-20131220Me",
+   "test": "Book 2 reversal window 20-12-2013 (Mercury)",
+   "book": "reversal possible",
+   "engine": "in window",
+   "pass_": true
+  },
+  {
+   "id": "M2-20140107Ve",
+   "test": "Book 2 reversal window 07-01-2014 (Venus)",
+   "book": "reversal possible",
+   "engine": "in window",
+   "pass_": true
+  },
+  {
+   "id": "M2-20140115Su",
+   "test": "Book 2 reversal window 15-01-2014 (Sun)",
+   "book": "reversal possible",
+   "engine": "in window",
+   "pass_": true
+  },
+  {
+   "id": "M2-20130806Ve",
+   "test": "Book 2 reversal window 06-08-2013 (Venus)",
+   "book": "reversal possible",
+   "engine": "in window",
+   "pass_": true
+  }
+ ]
 }

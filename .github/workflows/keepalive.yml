@@ -1,0 +1,32 @@
+name: Keep the app awake
+# Streamlit Community Cloud puts an app to sleep when nobody opens it for a while. This job opens the app in a real
+# headless browser every 3 hours and, if it finds the "app is asleep" page, presses the wake-up button and waits
+# until the app has loaded. The app's address is read from data/app_url.txt (or the APP_URL repository variable).
+on:
+  schedule:
+    - cron: '17 */3 * * *'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency: { group: astro-keepalive, cancel-in-progress: true }
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.12' }
+      - name: Resolve app URL
+        id: u
+        run: |
+          URL="${{ vars.APP_URL }}"
+          if [ -z "$URL" ] && [ -f data/app_url.txt ]; then URL=$(grep -m1 -Eo 'https://[^[:space:]]+' data/app_url.txt || true); fi
+          echo "url=$URL" >> $GITHUB_OUTPUT
+          if [ -z "$URL" ]; then echo "::warning::No app URL yet — put it in data/app_url.txt (or the APP_URL repository variable)."; fi
+      - name: Install browser
+        if: steps.u.outputs.url != ''
+        run: pip install playwright==1.47.0 && python -m playwright install --with-deps chromium
+      - name: Visit and wake
+        if: steps.u.outputs.url != ''
+        run: python tools/keepalive.py "${{ steps.u.outputs.url }}"

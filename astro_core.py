@@ -312,3 +312,70 @@ def find_ingresses(g: str, start: date, end: date, step_days=1.0):
             prev = s
         d = d2
     return out
+
+# ================================================================== additions for Books 2 & 3
+# Book 3 ('Predicting the Nifty & Sensex') aspect convention — verified 6/6 against its Ch.14 worked examples:
+# sign-based Vedic graha-dṛṣṭi; conjunction counts as an aspect; Rāhu/Ketu aspect only by conjunction / 7th.
+B3_DRISHTI = {'Ma': (4, 7, 8), 'Ju': (5, 7, 9), 'Sa': (3, 7, 10), 'Ra': (7,), 'Ke': (7,)}
+
+def b3_aspectors(c: Chart, target: str) -> list:
+    out = []
+    for a in NINE:
+        if a == target: continue
+        h = house_from(c[a].sign, c[target].sign)
+        if h == 1 or h in B3_DRISHTI.get(a, (7,)):
+            out.append(a)
+    return out
+
+def b3_conjunct(c: Chart, target: str) -> list:
+    return [a for a in NINE if a != target and c[a].sign == c[target].sign]
+
+AVASTHA = ['Baal', 'Kumar', 'Yuva', 'Vriddha', 'Mrita']   # 6° bands from 0° in odd signs; reversed in even signs
+def avastha(lon: float) -> str:
+    s = int(lon // 30); d = lon % 30
+    i = min(int(d // 6), 4)
+    return AVASTHA[i] if s % 2 == 0 else AVASTHA[4 - i]
+
+YOGA_NAMES = ['Vishkumbha', 'Priti', 'Ayushman', 'Saubhagya', 'Shobhana', 'Atiganda', 'Sukarma', 'Dhriti', 'Shoola',
+              'Ganda', 'Vriddhi', 'Dhruva', 'Vyaghata', 'Harshana', 'Vajra', 'Siddhi', 'Vyatipata', 'Variyan', 'Parigha',
+              'Shiva', 'Siddha', 'Sadhya', 'Shubha', 'Shukla', 'Brahma', 'Indra', 'Vaidhriti']
+def yoga_index(c: Chart) -> int:                      # 0..26
+    return int(((c['Su'].lon + c['Mo'].lon) % 360) // NAK_SPAN)
+
+KARANA_MOVABLE = ['Bava', 'Balava', 'Kaulava', 'Taitila', 'Gara', 'Vanija', 'Vishti']
+def karana(c: Chart) -> str:
+    k = int(((c['Mo'].lon - c['Su'].lon) % 360) // 6)  # 0..59
+    if k == 0: return 'Kintughna'
+    if k >= 57: return ['Shakuni', 'Chatushpada', 'Naga'][k - 57]
+    return KARANA_MOVABLE[(k - 1) % 7]
+
+TITHI_NAMES = ['Pratipada', 'Dwitiya', 'Tritiya', 'Chaturthi', 'Panchami', 'Shashthi', 'Saptami', 'Ashtami', 'Navami',
+               'Dashami', 'Ekadashi', 'Dwadashi', 'Trayodashi', 'Chaturdashi']
+def tithi_name(t: int) -> str:                        # t = 1..30
+    if t == 15: return 'Shukla Purnima'
+    if t == 30: return 'Krishna Amavasya'
+    return ('Shukla ' if t <= 15 else 'Krishna ') + TITHI_NAMES[(t - 1) % 15]
+
+def sunset(d: date, lat: float, lon: float, tz: str) -> datetime:
+    z = ZoneInfo(tz)
+    jd0 = to_jd(datetime(d.year, d.month, d.day, 0, 0, tzinfo=z))
+    flag = swe.CALC_SET | (swe.BIT_DISC_CENTER if CONFIG['sunrise_disc'] == 'center' else 0)
+    return from_jd(swe.rise_trans(jd0, swe.SUN, flag, (lon, lat, 0), 1013.25, 15)[1][0], z)
+
+LUNAR_MONTHS = ['Chaitra', 'Vaishakha', 'Jyeshtha', 'Ashadha', 'Shravana', 'Bhadrapada', 'Ashwin', 'Kartika',
+                'Margashirsha', 'Pausha', 'Magha', 'Phalguna']
+def lunar_month(dt: datetime) -> str:
+    """Amānta month: named from the Sun's rāśi at the new moon that began the month (Sun in Mīna → Chaitra)."""
+    c = chart(dt)
+    back = ((c['Mo'].lon - c['Su'].lon) % 360) / 12.19     # ≈ days since new moon
+    t = dt - timedelta(days=back)
+    for _ in range(40):                                   # refine to the conjunction
+        cc = chart(t); el = (cc['Mo'].lon - cc['Su'].lon) % 360
+        if el > 180: el -= 360
+        if abs(el) < 1e-4: break
+        t -= timedelta(days=el / 12.19)
+    return LUNAR_MONTHS[(chart(t)['Su'].sign + 1) % 12]
+
+def eclipse_times(year: int) -> list:
+    """[(kind, max_dt_utc)] for the year (solar & lunar)."""
+    return [(k, from_jd(t)) for k, t in eclipses_in_year(year)]
