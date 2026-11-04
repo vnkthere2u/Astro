@@ -43,6 +43,6 @@ jobs:
       - name: Commit results
         run: |
           git config user.name "astro-bot"; git config user.email "actions@users.noreply.github.com"
-          for f in data/tracker data/outlook.csv data/nse_ext.csv data/telegram_chat.txt; do [ -e "$f" ] && git add "$f"; done
+          for f in data/tracker data/outlook.csv data/nse_ext.csv data/telegram_chat.txt; do if [ -e "$f" ]; then git add "$f"; fi; done
           git diff --cached --quiet || git commit -m "AstroMarket ${{ steps.m.outputs.mode }} $(TZ=Asia/Kolkata date +%F)"
           git pull --rebase --autostash && git push
