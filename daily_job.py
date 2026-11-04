@@ -53,28 +53,16 @@ def log(d: date):
 
 # ------------------------------------------------------------------ messages
 def morning_text(d: date) -> str:
-    r = engine().day(d); W = E.WORD
-    nf = r.final[('NIFTY', 'intraday')]; bv = r.book[('NIFTY', 'intraday')]
-    L = [f"🪐 <b>AstroMarket — {d:%a %d %b %Y}</b>",
-         f"<b>Nifty today:</b> {ARW[TR.VIEW[nf]]} {TR.VIEW[nf]}  (Book 1 {TR.VIEW[bv[1]]} · Book 2 {TR.VIEW[bv[2]]})", '']
-    for k, nm in ((1, 'Book 1 — sectors'), (2, 'Book 2 — muhurta')):
-        up = [E.TARGET_NAME[t] for t in TR.TRACKABLE if t != 'NIFTY' and r.book[(t, 'intraday')][k] == 1]
-        dn = [E.TARGET_NAME[t] for t in TR.TRACKABLE if t != 'NIFTY' and r.book[(t, 'intraday')][k] == -1]
-        L.append(f"<b>{nm}:</b> ▲ {len(up)} up · ▼ {len(dn)} down")
-        if up: L.append('  ▲ ' + ', '.join(up))
-        if dn: L.append('  ▼ ' + ', '.join(dn))
-    dis = [E.TARGET_NAME[t] for t in TR.TRACKABLE if r.disagree[(t, 'intraday')]]
-    if dis: L.append(f"⚖️ Books disagree (shown Neutral): {', '.join(dis)}")
-    b2 = r.b2
-    L += ['', f"<b>Muhurta:</b> {b2['weekday']} · {b2['tithi']} · {b2['nakshatra']} · {b2['yoga']} yoga · {b2['karana']} karana"]
-    for v in b2['votes']:
-        if v['targets'] == 'ALL' and v['dir']: L.append(f"{'🟢' if v['dir'] > 0 else '🔴'} {v['text']}")
-    o, cl = r.open_dt, r.close_dt
-    win = [w for w in r.windows if w['kind'] in ('Rahu Kalam', 'Yamakandam', 'Gulika', 'Abhijit') and w['end'] > o and w['start'] < cl]
-    if win:
-        L += ['', '<b>Timing (Book 2):</b>'] + [f"{max(w['start'], o):%H:%M}–{min(w['end'], cl):%H:%M} {w['kind']} — {w['text']}" for w in win]
-    if r.reversal: L += ['', '🔄 <b>Reversal window (Ch.34):</b> ' + '; '.join(x['text'] for x in r.reversal)]
-    return '\n'.join(L)
+    import insights as I
+    r = engine().day(d)
+    L = [f"🪐 <b>AstroMarket — {d:%a %d %b %Y}</b>"]
+    for x in I.daily(r, TR.TRACKABLE):
+        L.append(f"{x['icon']} <b>{x['title']}</b>\n{x['text']}")
+    p = HERE / 'data' / 'outlook.csv'
+    if p.exists():
+        for x in I.ahead(pd.read_csv(p, parse_dates=['date']), d, 30)[:1]:
+            L.append(f"{x['icon']} <b>{x['title']}</b>\n{x['text']}")
+    return '\n\n'.join(L)
 
 
 def evening_text(d: date) -> str | None:
