@@ -81,7 +81,9 @@ def evening_text(d: date) -> str | None:
     df = TR.load()
     x = df[(df['date'] == pd.Timestamp(d)) & (df.horizon == 'intraday') & (df['mode'].isin(['live', 'late']))]
     if x.empty: return None
-    if (x.status == 'pending').any(): return None            # prices not in yet
+    import data_sources as ds
+    nse = {t for t, v in ds.PROXY.items() if v[0][0] == 'eod2'}
+    if ((x.status == 'pending') & x.target.isin(nse)).any(): return None   # NSE prices not in yet (US commodities may lag)
     s = x[x.status == 'scored']
     if s.empty: return None
     up = lambda col: s[s[col].isin(['Up', 'Down'])]

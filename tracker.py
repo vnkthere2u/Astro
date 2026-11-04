@@ -70,7 +70,7 @@ def log_predictions(eng: E.Engine, d: date, mode='live') -> int:
         why = ' | '.join(f"B{h['book']} {h['chapter']}: {h['text'][:80]}" for h in votes[:3])
         new.append(dict(logged_at=datetime.now().isoformat(timespec='seconds'), mode=mode, date=pd.Timestamp(d), target=t,
                         name=E.TARGET_NAME[t], horizon=hz, view=VIEW[f], book1=VIEW[bv[1]], book2=VIEW[bv[2]],
-                        disagree=bool(dis), past_hit_pct=C.pct(t, hz, 'final', f), why=why, status='pending' if f in (1, -1) else 'no call'))
+                        disagree=bool(dis), past_hit_pct=C.pct(t, hz, 'final', f), why=why, status='pending' if (f in (1, -1) or bv[1] in (1, -1) or bv[2] in (1, -1)) else 'no call'))
     if new:
         nd = _types(pd.DataFrame(new))
         df = _types(pd.concat([df, nd], ignore_index=True)) if len(df) else nd
@@ -81,6 +81,8 @@ def log_predictions(eng: E.Engine, d: date, mode='live') -> int:
 def settle(local_dir=None) -> int:
     df = load()
     if df.empty: return 0
+    reopen = (df.status == 'no call') & (df.book1.isin(['Up', 'Down']) | df.book2.isin(['Up', 'Down']))
+    df.loc[reopen, 'status'] = 'pending'
     pend = df[df.status == 'pending']; n = 0
     for t in pend.target.unique():
         rf, meta = ds.returns_frame(t, local_dir=local_dir)
@@ -97,7 +99,7 @@ def settle(local_dir=None) -> int:
             if pd.isna(ret): continue
             df.loc[i, 'actual_ret'] = float(ret)
             df.loc[i, 'outcome'] = 'Up' if ret > 0 else 'Down' if ret < 0 else 'Flat'
-            df.loc[i, 'correct'] = float((ret > 0) == (row['view'] == 'Up')) if ret != 0 else np.nan
+            df.loc[i, 'correct'] = float((ret > 0) == (row['view'] == 'Up')) if (ret != 0 and row['view'] in ('Up', 'Down')) else np.nan
             df.loc[i, 'status'] = 'scored'; df.loc[i, 'settled_at'] = datetime.now().isoformat(timespec='seconds'); n += 1
     save(df); return n
 
@@ -117,6 +119,8 @@ def scored(df=None, modes=('live',)):
 
 def stats(df=None, modes=('live',)) -> dict:
     s = scored(df, modes)
+    allsc = (load() if df is None else df)
+    allsc = allsc[(allsc.status == 'scored') & (allsc['mode'].isin(modes))]
     if s.empty: return dict(n=0)
     out = dict(n=int(len(s)), hit=float(s.correct.mean()))
     out['by_horizon'] = {hz: dict(n=int(len(g)), hit=float(g.correct.mean()),
@@ -125,7 +129,7 @@ def stats(df=None, modes=('live',)) -> dict:
     out['nifty'] = {hz: dict(n=int(len(g)), hit=float(g.correct.mean())) for hz, g in s[s.target == 'NIFTY'].groupby('horizon')}
     by_book = {}
     for b in ('book1', 'book2'):
-        x = s[s[b].isin(['Up', 'Down'])]
+        x = allsc[allsc[b].isin(['Up', 'Down']) & (allsc.actual_ret != 0)]
         if len(x): by_book[b] = dict(n=int(len(x)), hit=float(((x[b] == 'Up') == (x.actual_ret > 0)).mean()))
     out['by_book'] = by_book
     return out
