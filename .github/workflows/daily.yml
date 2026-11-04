@@ -14,7 +14,7 @@ on:
   workflow_dispatch:
     inputs:
       mode:
-        description: 'morning | evening | paper | outlook'
+        description: 'morning | evening | paper | outlook | ping'
         default: 'evening'
 permissions:
   contents: write

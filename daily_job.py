@@ -151,6 +151,12 @@ def outlook(days=372):
     print(f'outlook {start}..{end}: {len(rows)} rows')
 
 
+def ping():
+    ok = A.send(f"✅ <b>AstroMarket test ping</b>\nSent from GitHub Actions at {now_ist():%d %b %Y %H:%M} IST — alerts are working.")
+    print('ping sent' if ok else 'ping NOT sent'); 
+    if not ok: sys.exit(1)
+
+
 def paper(days=90):
     df = TR.load()
     if len(df): TR.save(df[df['mode'] != 'paper'])
@@ -160,4 +166,4 @@ def paper(days=90):
 
 if __name__ == '__main__':
     mode = sys.argv[1] if len(sys.argv) > 1 else 'evening'
-    {'morning': morning, 'evening': evening, 'paper': paper, 'outlook': outlook}[mode]()
+    {'morning': morning, 'evening': evening, 'paper': paper, 'outlook': outlook, 'ping': ping}[mode]()
