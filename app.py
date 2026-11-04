@@ -67,6 +67,17 @@ st.sidebar.markdown('---')
 st.sidebar.caption('▲ green = **Up** · ◆ amber = **Neutral** · ▼ red = **Down** · grey = no rule in the books.')
 st.sidebar.caption('**B1** = Stock Market Astrology · **B2** = Investment Muhurtas. If one says Up and the other Down, the combined call is Neutral ⚖️.')
 st.sidebar.caption('Calls are logged automatically the evening before; a Telegram alert goes out each morning and a right/wrong check after the close.')
+st.sidebar.markdown('---')
+if st.sidebar.button('📨 Send Telegram test ping', width='stretch'):
+    import alerts as A
+    if not A._token():
+        st.sidebar.error('The app has no TELEGRAM_BOT_TOKEN. Add it under Streamlit Cloud → your app → Settings → Secrets as:  TELEGRAM_BOT_TOKEN = "…"')
+    elif not A.chat_id():
+        st.sidebar.error('The bot has not seen a message from you yet. Open your bot in Telegram, send /start, then press the button again.')
+    elif A.send(f"✅ <b>AstroMarket test ping</b>\nSent from the app at {datetime.now(ac.IST):%d %b %Y %H:%M} IST — alerts are working."):
+        st.sidebar.success('Ping sent — check Telegram.')
+    else:
+        st.sidebar.error('Telegram refused the message — check the token is current (not revoked).')
 
 # ================================================================= DAILY VIEW
 if page == 'Daily view':
