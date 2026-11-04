@@ -1,13 +1,21 @@
 name: AstroMarket daily
+# GitHub can start scheduled jobs hours late, so each job is scheduled several times; every run is idempotent and
+# each Telegram alert is sent once per date by whichever run gets there first.
 on:
   schedule:
-    - cron: '30 2 * * 1-5'    # 08:00 IST — log today's calls before the 09:15 IST open
-    - cron: '30 14 * * 1-5'   # 20:00 IST — score calls against the day's closing prices
+    - cron: '30 20 * * 0-4'   # 02:00 IST  morning (Mon–Fri IST)
+    - cron: '30 22 * * 0-4'   # 04:00 IST  morning
+    - cron: '30 0 * * 1-5'    # 06:00 IST  morning
+    - cron: '15 2 * * 1-5'    # 07:45 IST  morning
+    - cron: '30 11 * * 1-5'   # 17:00 IST  evening: score, close check, log next session, outlook
+    - cron: '30 13 * * 1-5'   # 19:00 IST  evening
+    - cron: '30 15 * * 1-5'   # 21:00 IST  evening
+    - cron: '30 17 * * 1-5'   # 23:00 IST  evening
   workflow_dispatch:
     inputs:
       mode:
-        description: 'morning | evening | paper | all'
-        default: 'all'
+        description: 'morning | evening | paper | outlook'
+        default: 'evening'
 permissions:
   contents: write
 concurrency: { group: astro-daily, cancel-in-progress: false }
@@ -15,6 +23,9 @@ jobs:
   run:
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    env:
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -24,12 +35,14 @@ jobs:
         id: m
         run: |
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then echo "mode=${{ inputs.mode }}" >> $GITHUB_OUTPUT
-          elif [ "${{ github.event.schedule }}" = "30 2 * * 1-5" ]; then echo "mode=morning" >> $GITHUB_OUTPUT
-          else echo "mode=evening" >> $GITHUB_OUTPUT; fi
+          else
+            H=$(TZ=Asia/Kolkata date +%H)
+            if [ "$H" -lt 12 ]; then echo "mode=morning" >> $GITHUB_OUTPUT; else echo "mode=evening" >> $GITHUB_OUTPUT; fi
+          fi
       - run: python daily_job.py ${{ steps.m.outputs.mode }}
       - name: Commit results
         run: |
           git config user.name "astro-bot"; git config user.email "actions@users.noreply.github.com"
-          git add data/tracker || true
+          for f in data/tracker data/outlook.csv data/nse_ext.csv data/telegram_chat.txt; do [ -e "$f" ] && git add "$f"; done
           git diff --cached --quiet || git commit -m "AstroMarket ${{ steps.m.outputs.mode }} $(TZ=Asia/Kolkata date +%F)"
           git pull --rebase --autostash && git push

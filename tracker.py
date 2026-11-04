@@ -19,11 +19,11 @@ import engine as E, data_sources as ds, calib as C
 HERE = Path(__file__).parent
 TDIR = HERE / 'data' / 'tracker'; TDIR.mkdir(parents=True, exist_ok=True)
 LOG = TDIR / 'predictions.csv'
-COLS = ['logged_at', 'mode', 'date', 'target', 'name', 'horizon', 'view', 'book1', 'book2', 'book3', 'disagree',
+COLS = ['logged_at', 'mode', 'date', 'target', 'name', 'horizon', 'view', 'book1', 'book2', 'disagree',
         'past_hit_pct', 'why', 'actual_ret', 'outcome', 'correct', 'status', 'settled_at']
 HZ_SESSIONS = {'intraday': 1, 'short': 5, 'long': 40}
 HZ_WORD = {'intraday': 'Today', 'short': 'Short-term', 'long': 'Long-term'}
-TEXT = ['logged_at', 'mode', 'target', 'name', 'horizon', 'view', 'book1', 'book2', 'book3', 'why', 'outcome', 'status', 'settled_at']
+TEXT = ['logged_at', 'mode', 'target', 'name', 'horizon', 'view', 'book1', 'book2', 'why', 'outcome', 'status', 'settled_at']
 TRACKABLE = [t for t, src in ds.PROXY.items() if src[0][2] in ('direct', 'proxy') and src[0][0] != 'yf']
 VIEW = {1: 'Up', -1: 'Down', 0: 'Neutral', None: 'No rule'}
 
@@ -69,7 +69,7 @@ def log_predictions(eng: E.Engine, d: date, mode='live') -> int:
         votes = [h for h in r.votes(t, hz) if h['dir'] in (1, -1)]
         why = ' | '.join(f"B{h['book']} {h['chapter']}: {h['text'][:80]}" for h in votes[:3])
         new.append(dict(logged_at=datetime.now().isoformat(timespec='seconds'), mode=mode, date=pd.Timestamp(d), target=t,
-                        name=E.TARGET_NAME[t], horizon=hz, view=VIEW[f], book1=VIEW[bv[1]], book2=VIEW[bv[2]], book3=VIEW[bv[3]],
+                        name=E.TARGET_NAME[t], horizon=hz, view=VIEW[f], book1=VIEW[bv[1]], book2=VIEW[bv[2]],
                         disagree=bool(dis), past_hit_pct=C.pct(t, hz, 'final', f), why=why, status='pending' if f in (1, -1) else 'no call'))
     if new:
         nd = _types(pd.DataFrame(new))
@@ -124,7 +124,7 @@ def stats(df=None, modes=('live',)) -> dict:
                          for hz, g in s.groupby('horizon')}
     out['nifty'] = {hz: dict(n=int(len(g)), hit=float(g.correct.mean())) for hz, g in s[s.target == 'NIFTY'].groupby('horizon')}
     by_book = {}
-    for b in ('book1', 'book2', 'book3'):
+    for b in ('book1', 'book2'):
         x = s[s[b].isin(['Up', 'Down'])]
         if len(x): by_book[b] = dict(n=int(len(x)), hit=float(((x[b] == 'Up') == (x.actual_ret > 0)).mean()))
     out['by_book'] = by_book

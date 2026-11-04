@@ -3,6 +3,3 @@ pandas>=2.2
 numpy
 pyarrow
 streamlit>=1.40
-plotly>=5
-yfinance
-scipy

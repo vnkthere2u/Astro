@@ -1,67 +1,67 @@
 {
- "generated": "2026-10-26T15:54:41+00:00",
+ "generated": "2026-11-04T17:54:18+00:00",
  "matrix": [
   {
    "ayanamsa": "Lahiri",
    "node": "true",
-   "hard_pass": 80,
-   "hard_total": 80,
+   "hard_pass": 74,
+   "hard_total": 74,
    "soft_pass": 3,
    "soft_total": 5
   },
   {
    "ayanamsa": "Lahiri",
    "node": "mean",
-   "hard_pass": 78,
-   "hard_total": 80,
+   "hard_pass": 72,
+   "hard_total": 74,
    "soft_pass": 3,
    "soft_total": 5
   },
   {
    "ayanamsa": "Raman",
    "node": "true",
-   "hard_pass": 52,
-   "hard_total": 80,
-   "soft_pass": 3,
-   "soft_total": 5
-  },
-  {
-   "ayanamsa": "Raman",
-   "node": "mean",
    "hard_pass": 51,
-   "hard_total": 80,
+   "hard_total": 74,
    "soft_pass": 3,
    "soft_total": 5
   },
   {
-   "ayanamsa": "Krishnamurti",
-   "node": "true",
-   "hard_pass": 78,
-   "hard_total": 80,
-   "soft_pass": 3,
-   "soft_total": 5
-  },
-  {
-   "ayanamsa": "Krishnamurti",
+   "ayanamsa": "Raman",
    "node": "mean",
-   "hard_pass": 78,
-   "hard_total": 80,
+   "hard_pass": 50,
+   "hard_total": 74,
    "soft_pass": 3,
    "soft_total": 5
   },
   {
-   "ayanamsa": "Fagan-Bradley",
+   "ayanamsa": "Krishnamurti",
    "node": "true",
    "hard_pass": 72,
-   "hard_total": 80,
+   "hard_total": 74,
+   "soft_pass": 3,
+   "soft_total": 5
+  },
+  {
+   "ayanamsa": "Krishnamurti",
+   "node": "mean",
+   "hard_pass": 72,
+   "hard_total": 74,
+   "soft_pass": 3,
+   "soft_total": 5
+  },
+  {
+   "ayanamsa": "Fagan-Bradley",
+   "node": "true",
+   "hard_pass": 68,
+   "hard_total": 74,
    "soft_pass": 3,
    "soft_total": 5
   },
   {
    "ayanamsa": "Fagan-Bradley",
    "node": "mean",
-   "hard_pass": 70,
-   "hard_total": 80,
+   "hard_pass": 66,
+   "hard_total": 74,
    "soft_pass": 3,
    "soft_total": 5
   },
@@ -69,7 +69,7 @@
    "ayanamsa": "Tropical",
    "node": "true",
    "hard_pass": 11,
-   "hard_total": 80,
+   "hard_total": 74,
    "soft_pass": 2,
    "soft_total": 5
   },
@@ -77,7 +77,7 @@
    "ayanamsa": "Tropical",
    "node": "mean",
    "hard_pass": 10,
-   "hard_total": 80,
+   "hard_total": 74,
    "soft_pass": 2,
    "soft_total": 5
   }
@@ -85,72 +85,12 @@
  "chosen": {
   "ayanamsa": "Lahiri",
   "node": "true",
-  "hard_pass": 80,
-  "hard_total": 80,
+  "hard_pass": 74,
+  "hard_total": 74,
   "soft_pass": 3,
   "soft_total": 5
  },
  "tests": [
-  {
-   "id": "B3-1",
-   "group": "Book 3 Ch.14",
-   "test": "01-Feb-2012 09:00: Moon sign, avasthā, aspects on Moon, nakshatra, yoga, tithi",
-   "book": "('Aries', 'Mrita', {'Sa', 'Ju'}, 'Kṛttikā', 'Shukla', 9)",
-   "engine": "('Aries', 'Mrita', {'Sa', 'Ju'}, 'Kṛttikā', 'Shukla', 9)",
-   "pass_": true,
-   "page": "Ch.14",
-   "hard": true
-  },
-  {
-   "id": "B3-2",
-   "group": "Book 3 Ch.14",
-   "test": "02-Feb-2012 09:00: Moon sign, avasthā, aspects on Moon, nakshatra, yoga, tithi",
-   "book": "('Taurus', 'Vriddha', {'Ra', 'Ke'}, 'Rohiṇī', 'Brahma', 10)",
-   "engine": "('Taurus', 'Vriddha', {'Ra', 'Ke'}, 'Rohiṇī', 'Brahma', 10)",
-   "pass_": true,
-   "page": "Ch.14",
-   "hard": true
-  },
-  {
-   "id": "B3-3",
-   "group": "Book 3 Ch.14",
-   "test": "03-Feb-2012 09:00: Moon sign, avasthā, aspects on Moon, nakshatra, yoga, tithi",
-   "book": "('Taurus', 'Kumar', {'Ra', 'Ke'}, 'Rohiṇī', 'Indra', 11)",
-   "engine": "('Taurus', 'Kumar', {'Ra', 'Ke'}, 'Rohiṇī', 'Indra', 11)",
-   "pass_": true,
-   "page": "Ch.14",
-   "hard": true
-  },
-  {
-   "id": "B3-4",
-   "group": "Book 3 Ch.14",
-   "test": "07-Feb-2012 09:00: Moon sign, avasthā, aspects on Moon, nakshatra, yoga, tithi",
-   "book": "('Cancer', 'Yuva', {'Sa', 'Su', 'Me'}, 'Puṣya', 'Ayushman', 15)",
-   "engine": "('Cancer', 'Yuva', {'Sa', 'Su', 'Me'}, 'Puṣya', 'Ayushman', 15)",
-   "pass_": true,
-   "page": "Ch.14",
-   "hard": true
-  },
-  {
-   "id": "B3-5",
-   "group": "Book 3 Ch.14",
-   "test": "08-Feb-2012 09:00: Moon sign, avasthā, aspects on Moon, nakshatra, yoga, tithi",
-   "book": "('Cancer', 'Baal', {'Sa', 'Su', 'Me'}, 'Aśleṣā', 'Saubhagya', 16)",
-   "engine": "('Cancer', 'Baal', {'Sa', 'Su', 'Me'}, 'Aśleṣā', 'Saubhagya', 16)",
-   "pass_": true,
-   "page": "Ch.14",
-   "hard": true
-  },
-  {
-   "id": "B3-6",
-   "group": "Book 3 Ch.14",
-   "test": "09-Feb-2012 09:00: Moon sign, avasthā, aspects on Moon, nakshatra, yoga, tithi",
-   "book": "('Leo', 'Kumar', {'Ma', 'Ju'}, 'Maghā', 'Atiganda', 17)",
-   "engine": "('Leo', 'Kumar', {'Ma', 'Ju'}, 'Maghā', 'Atiganda', 17)",
-   "pass_": true,
-   "page": "Ch.14",
-   "hard": true
-  },
   {
    "id": "B2-1",
    "group": "Book 2 Ch.34",
@@ -1033,48 +973,6 @@
  },
  "swisseph_version": "2.10.03",
  "method_tests": [
-  {
-   "id": "M3-1",
-   "test": "Book 3 concluded prediction 01-Feb-2012",
-   "book": "Neutral",
-   "engine": "Neutral",
-   "pass_": true
-  },
-  {
-   "id": "M3-2",
-   "test": "Book 3 concluded prediction 02-Feb-2012",
-   "book": "Up",
-   "engine": "Up",
-   "pass_": true
-  },
-  {
-   "id": "M3-3",
-   "test": "Book 3 concluded prediction 03-Feb-2012",
-   "book": "Up",
-   "engine": "Up",
-   "pass_": true
-  },
-  {
-   "id": "M3-7",
-   "test": "Book 3 concluded prediction 07-Feb-2012",
-   "book": "Neutral",
-   "engine": "Neutral",
-   "pass_": true
-  },
-  {
-   "id": "M3-8",
-   "test": "Book 3 concluded prediction 08-Feb-2012",
-   "book": "Up",
-   "engine": "Up",
-   "pass_": true
-  },
-  {
-   "id": "M3-9",
-   "test": "Book 3 concluded prediction 09-Feb-2012",
-   "book": "Up",
-   "engine": "Up",
-   "pass_": true
-  },
   {
    "id": "M2-20140708Ma",
    "test": "Book 2 reversal window 08-07-2014 (Mars)",

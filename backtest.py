@@ -2,7 +2,7 @@
 backtest.py — how often each book's call has matched the market in the past (information only).
 
 The books' rules are applied exactly as in the live app (engine.py) to every past trading day; nothing is tuned to the
-result. For each target / horizon / source (final call, Book 1, Book 2, Book 3) we count Up and Down calls that came
+result. For each target / horizon / source (final call, Book 1, Book 2) we count Up and Down calls that came
 true. Scoring windows (a measurement convention, not part of any prediction): today = open→close;
 short-term = 5 sessions; long-term = 40 sessions.
 
@@ -20,7 +20,7 @@ import engine as E, data_sources as ds
 HERE = Path(__file__).parent; DATA = HERE / 'data'
 WINDOW = {'intraday': 1, 'short': 5, 'long': 40}
 TRACK = [t for t, src in ds.PROXY.items() if src[0][2] in ('direct', 'proxy') and src[0][0] != 'yf']
-SOURCES = ['final', 'b1', 'b2', 'b3']
+SOURCES = ['final', 'b1', 'b2']
 
 
 def wilson(k, n, z=1.96):
@@ -39,11 +39,11 @@ def history(start: date, end: date, eng=None):
             for t in TRACK:
                 for hz in E.HORIZONS:
                     bv = r.book[(t, hz)]
-                    rows.append((pd.Timestamp(d), t, hz, r.final[(t, hz)], bv[1], bv[2], bv[3]))
+                    rows.append((pd.Timestamp(d), t, hz, r.final[(t, hz)], bv[1], bv[2]))
             eng._cache.clear()
         d += timedelta(days=1)
     print(f'history {start}..{end}: {len(rows)} rows in {_t.time() - t0:.0f}s')
-    return pd.DataFrame(rows, columns=['date', 'target', 'horizon', 'final', 'b1', 'b2', 'b3'])
+    return pd.DataFrame(rows, columns=['date', 'target', 'horizon', 'final', 'b1', 'b2'])
 
 
 def score(H: pd.DataFrame):
@@ -75,29 +75,14 @@ def score(H: pd.DataFrame):
     return out, (pd.concat(joined) if joined else pd.DataFrame())
 
 
-def book_windows(J):
-    """Book 3 Ch.14 states its software was right on 16 of 23 days (14 Apr-15 May 2003) and 16 of 21 (14 Apr-15 May 2005)."""
-    out = {}
-    n = J[(J.target == 'NIFTY') & (J.horizon == 'intraday')]
-    for a, b, claim in (('2003-04-14', '2003-05-15', '16/23 (70%)'), ('2005-04-14', '2005-05-15', '16/21 (76.2%)')):
-        y = n[(n.date >= a) & (n.date <= b)]
-        for s in ('b3', 'final'):
-            z = y[y[s].isin([1, -1])]
-            k = int(((z[s] > 0) == (z.ret > 0)).sum())
-            out[f'{a}..{b}:{s}'] = dict(calls=int(len(z)), right=k, days=int(len(y)), book_claim=claim)
-    return out
-
-
 if __name__ == '__main__':
     start = date.fromisoformat(sys.argv[1]) if len(sys.argv) > 1 else date(2003, 1, 1)
     end = date.today()
     H = history(start, end)
     H.to_parquet(DATA / 'verdict_history.parquet', index=False)
     cal, J = score(H)
-    cal['_book3_windows'] = book_windows(J) if len(J) else {}
     cal['_meta'] = dict(start=str(start), end=str(end), windows=WINDOW, generated=str(date.today()))
     (DATA / 'calibration.json').write_text(json.dumps(cal, indent=1, default=float))
     n = cal.get('NIFTY', {})
     for hz in E.HORIZONS:
         if hz in n: print(hz, {s: (n[hz][s].get('n'), round(n[hz][s]['p'], 3) if n[hz][s].get('p') else None) for s in SOURCES}, 'base_up', round(n[hz]['base_up'] or 0, 3))
-    print(json.dumps(cal['_book3_windows'], indent=1))

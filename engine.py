@@ -1,11 +1,9 @@
 """
-engine.py — combines the three books, strictly as written.
+engine.py — combines Book 1 and Book 2, strictly as written.
 
   Book 1  Stock Market Astrology (2009)          → sectors & commodities, intraday / short / long; Nifty long (Ch.16, 19)
   Book 2  Investment Muhurtas (2014)             → the day's auspiciousness → market & every sector intraday;
                                                     timing windows; trend-reversal windows (Ch.34)
-  Book 3  Predicting the Nifty & Sensex          → Nifty intraday (Ch.14 method), Nifty short / long (Ch.1),
-                                                    sector short-term (Sun-transit paragraphs)
 
 Combination — the only convention the app adds, because the books never say how to merge their votes:
   • inside one book: count its Up and Down votes for that target & horizon; more Up → Up, more Down → Down,
@@ -20,7 +18,7 @@ from dataclasses import dataclass, field
 from datetime import datetime, date, time, timedelta
 from pathlib import Path
 from zoneinfo import ZoneInfo
-import astro_core as ac, book1 as B1, book2 as B2, book3 as B3
+import astro_core as ac, book1 as B1, book2 as B2
 
 HERE = Path(__file__).parent
 RB = B1.RB
@@ -52,7 +50,6 @@ class DayResult:
     book: dict                         # (target, horizon) -> {1: dir|None, 2: …, 3: …}
     final: dict                        # (target, horizon) -> dir|None
     disagree: dict                     # (target, horizon) -> bool
-    b3: dict                           # Book 3 Ch.14 detail
     b2: dict                           # Book 2 day detail
     windows: list                      # Book 2 timing windows
     hora: list                         # Book 1 Ch.10 horā rows
@@ -93,29 +90,18 @@ class Engine:
         for v in b2['votes']:
             tg = TARGETS if v['targets'] == 'ALL' else v['targets']
             for t in tg: hits.append(dict(target=t, horizon='intraday', dir=v['dir'], book=2, chapter=v['factor'], text=v['text']))
-        # ---------------- Book 3
-        b3 = B3.intraday(c)
-        hits.append(dict(target='NIFTY', horizon='intraday', dir=b3['dir'], book=3, chapter='Ch.14 method',
-                         text=' '.join(b3['steps'])))
-        for dd, txt in B3.short_term(c): hits.append(dict(target='NIFTY', horizon='short', dir=dd, book=3, chapter='Ch.1', text=txt))
-        for dd, txt in B3.long_term(c): hits.append(dict(target='NIFTY', horizon='long', dir=dd, book=3, chapter='Ch.1', text=txt))
-        tbs = {s: RB['ch7'][[i for i, e in enumerate(RB['ch7']) if e['graha'] == 'Su' and e['rasi'] == s][0]]['targets'] for s in range(12)}
-        for tg, dd, txt in B3.sector_short(c, tbs):
-            for t in tg: hits.append(dict(target=t, horizon='short', dir=dd, book=3, chapter='Sun-transit paragraph', text=txt))
         # ---------------- combine
         book, final, dis = {}, {}, {}
         idx = {}
         for h in hits: idx.setdefault((h['target'], h['horizon'], h['book']), []).append(h['dir'])
         for t in TARGETS:
             for hz in HORIZONS:
-                bv = {k: count(idx.get((t, hz, k), [])) for k in (1, 2, 3)}
-                # Book 3's intraday Nifty call is one method-level result (the Ch.14 conclusion), not a count
-                if t == 'NIFTY' and hz == 'intraday': bv[3] = b3['dir']
+                bv = {k: count(idx.get((t, hz, k), [])) for k in (1, 2)}
                 book[(t, hz)] = bv
                 dirs = [x for x in bv.values() if x in (1, -1)]
                 final[(t, hz)] = count(dirs) if dirs else (0 if any(x == 0 for x in bv.values()) else None)
                 dis[(t, hz)] = (1 in dirs and -1 in dirs)
-        res = DayResult(d, self.exchange, o, cl, c, hits, book, final, dis, b3, b2,
+        res = DayResult(d, self.exchange, o, cl, c, hits, book, final, dis, b2,
                         B2.windows(d, self.lat, self.lon, self.tz), B1.hora_windows(d, self.lat, self.lon, self.tz, o, cl, c),
                         B1.dasha_windows(c, o, cl), B2.reversal_window(c), regime, flags)
         if len(self._cache) > 4000: self._cache.clear()

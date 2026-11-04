@@ -1,10 +1,10 @@
 name: Keep the app awake
 # Streamlit Community Cloud puts an app to sleep when nobody opens it for a while. This job opens the app in a real
-# headless browser every 3 hours and, if it finds the "app is asleep" page, presses the wake-up button and waits
+# headless browser about every hour and, if it finds the "app is asleep" page, presses the wake-up button and waits
 # until the app has loaded. The app's address is read from data/app_url.txt (or the APP_URL repository variable).
 on:
   schedule:
-    - cron: '17 */3 * * *'
+    - cron: '23 * * * *'      # hourly (GitHub often skips or delays runs; frequent attempts keep the gap short)
   workflow_dispatch:
 permissions:
   contents: read

@@ -108,8 +108,81 @@ def series_for(target: str, refresh=False, local_dir=None):
     for src, key, q in PROXY.get(target, []):
         df = load_series(src, key, refresh, local_dir)
         if df is not None and len(df) > 50:
+            if src == 'eod2': df = _extend(df, key)
             return df, dict(source=src, key=key, quality=q)
     return None, None
+
+
+# ------------------------------------------------------------------ NSE official daily files (extends eod2)
+# The eod2 mirror stopped updating on 23-Oct-2026. Recent days are taken straight from NSE's own end-of-day files:
+#   indices: nsearchives.nseindia.com/content/indices/ind_close_all_DDMMYYYY.csv
+#   ETFs (GOLDBEES, SILVERBEES): nsearchives.nseindia.com/products/content/sec_bhavdata_full_DDMMYYYY.csv
+# Only the rows the app needs are kept, in data/nse_ext.csv (committed by the daily job, so each day is fetched once).
+NSE_EXT = HERE / 'data' / 'nse_ext.csv'
+NSE_IDX = 'https://nsearchives.nseindia.com/content/indices/ind_close_all_{:%d%m%Y}.csv'
+NSE_BHAV = 'https://nsearchives.nseindia.com/products/content/sec_bhavdata_full_{:%d%m%Y}.csv'
+_NSE_HDR = {'User-Agent': 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124 Safari/537.36',
+            'Accept': 'text/csv,*/*', 'Referer': 'https://www.nseindia.com/'}
+_EXT = None
+
+
+def _nse_get(url):
+    req = urllib.request.Request(url, headers=_NSE_HDR)
+    with urllib.request.urlopen(req, timeout=30) as r:
+        return r.read()
+
+
+def _num(x):
+    try: return float(str(x).replace(',', '').strip())
+    except Exception: return float('nan')
+
+
+def update_nse_ext(start: date, end: date | None = None) -> int:
+    """Fetch NSE's daily files for every weekday in [start, end] not yet stored. Returns rows added."""
+    end = end or date.today()
+    keys = {k for v in PROXY.values() for s, k, q in v if s == 'eod2'}
+    ext = pd.read_csv(NSE_EXT, parse_dates=['date']) if NSE_EXT.exists() else pd.DataFrame(columns=['date', 'key', 'open', 'high', 'low', 'close'])
+    have = set(pd.to_datetime(ext['date']).dt.date) if len(ext) else set()
+    rows = []; d = start
+    while d <= end:
+        if d.weekday() < 5 and d not in have:
+            try:
+                ix = pd.read_csv(io.BytesIO(_nse_get(NSE_IDX.format(d))))
+                ix.columns = [c.strip().lower() for c in ix.columns]
+                for _, r in ix.iterrows():
+                    k = str(r['index name']).strip().lower()
+                    if k in keys:
+                        rows.append((d, k, _num(r['open index value']), _num(r['high index value']), _num(r['low index value']), _num(r['closing index value'])))
+                try:
+                    bh = pd.read_csv(io.BytesIO(_nse_get(NSE_BHAV.format(d))))
+                    bh.columns = [c.strip().upper() for c in bh.columns]
+                    for sym in ('GOLDBEES', 'SILVERBEES'):
+                        x = bh[(bh['SYMBOL'].str.strip() == sym) & (bh['SERIES'].str.strip() == 'EQ')]
+                        if len(x):
+                            r = x.iloc[0]
+                            rows.append((d, sym.lower(), _num(r['OPEN_PRICE']), _num(r['HIGH_PRICE']), _num(r['LOW_PRICE']), _num(r['CLOSE_PRICE'])))
+                except Exception as e:
+                    print(f'NSE bhavcopy {d}: {e}')
+            except Exception as e:      # holiday (no file) or file not published yet
+                print(f'NSE index file {d}: {type(e).__name__}')
+        d += timedelta(days=1)
+    if rows:
+        new = pd.DataFrame(rows, columns=['date', 'key', 'open', 'high', 'low', 'close'])
+        ext = pd.concat([ext, new], ignore_index=True) if len(ext) else new
+        ext['date'] = pd.to_datetime(ext['date'])
+        ext.drop_duplicates(['date', 'key'], keep='last').sort_values(['date', 'key']).to_csv(NSE_EXT, index=False)
+        global _EXT; _EXT = None
+    return len(rows)
+
+
+def _extend(df, key):
+    global _EXT
+    if _EXT is None:
+        _EXT = pd.read_csv(NSE_EXT, parse_dates=['date']) if NSE_EXT.exists() else pd.DataFrame()
+    if _EXT.empty: return df
+    x = _EXT[_EXT.key == key].set_index('date')[['open', 'high', 'low', 'close']]
+    x = x[x.index > df.index.max()]
+    return pd.concat([df, x]).sort_index() if len(x) else df
 
 def integrity_report(df: pd.DataFrame) -> dict:
     """Source-quality checks for a price series."""
