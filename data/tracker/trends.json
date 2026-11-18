@@ -1,0 +1,507 @@
+{
+"AUTO|intraday|book1": {
+"meaningful": false,
+"k": 4,
+"n": 6
+},
+"AUTO|intraday|book2": {
+"meaningful": false,
+"k": 4,
+"n": 8
+},
+"AUTO|intraday|view": {
+"meaningful": false,
+"k": 4,
+"n": 7
+},
+"BANK|intraday|book1": {
+"meaningful": false,
+"k": 2,
+"n": 5
+},
+"BANK|intraday|book2": {
+"meaningful": false,
+"k": 6,
+"n": 8
+},
+"BANK|intraday|view": {
+"meaningful": false,
+"k": 4,
+"n": 5
+},
+"BANK|short|book1": {
+"meaningful": false,
+"k": 1,
+"n": 1
+},
+"BANK|short|view": {
+"meaningful": false,
+"k": 1,
+"n": 1
+},
+"CAPGOODS|intraday|book1": {
+"meaningful": false,
+"k": 1,
+"n": 7
+},
+"CAPGOODS|intraday|book2": {
+"meaningful": false,
+"k": 3,
+"n": 8
+},
+"CAPGOODS|intraday|view": {
+"meaningful": false,
+"k": 1,
+"n": 5
+},
+"CRUDE|intraday|book1": {
+"meaningful": false,
+"k": 1,
+"n": 4
+},
+"CRUDE|intraday|book2": {
+"meaningful": false,
+"k": 3,
+"n": 3
+},
+"CRUDE|intraday|view": {
+"meaningful": false,
+"k": 1,
+"n": 2
+},
+"CRUDE|short|book1": {
+"meaningful": false,
+"k": 0,
+"n": 1
+},
+"CRUDE|short|view": {
+"meaningful": false,
+"k": 0,
+"n": 1
+},
+"FMCG|intraday|book1": {
+"meaningful": false,
+"k": 3,
+"n": 6
+},
+"FMCG|intraday|book2": {
+"meaningful": false,
+"k": 5,
+"n": 8
+},
+"FMCG|intraday|view": {
+"meaningful": false,
+"k": 3,
+"n": 5
+},
+"FMCG|short|book1": {
+"meaningful": false,
+"k": 1,
+"n": 1
+},
+"FMCG|short|view": {
+"meaningful": false,
+"k": 1,
+"n": 1
+},
+"GEMS|intraday|book1": {
+"meaningful": false,
+"k": 1,
+"n": 6
+},
+"GEMS|intraday|book2": {
+"meaningful": false,
+"k": 7,
+"n": 8
+},
+"GEMS|intraday|view": {
+"meaningful": false,
+"k": 3,
+"n": 4
+},
+"GEMS|short|book1": {
+"meaningful": false,
+"k": 1,
+"n": 1
+},
+"GEMS|short|view": {
+"meaningful": false,
+"k": 1,
+"n": 1
+},
+"GOLD|intraday|book1": {
+"meaningful": false,
+"k": 2,
+"n": 2
+},
+"GOLD|intraday|book2": {
+"meaningful": false,
+"k": 4,
+"n": 7
+},
+"GOLD|intraday|view": {
+"meaningful": false,
+"k": 4,
+"n": 6
+},
+"HEALTH|intraday|book1": {
+"meaningful": false,
+"k": 4,
+"n": 7
+},
+"HEALTH|intraday|book2": {
+"meaningful": false,
+"k": 3,
+"n": 8
+},
+"HEALTH|intraday|view": {
+"meaningful": false,
+"k": 3,
+"n": 6
+},
+"HEALTH|short|book1": {
+"meaningful": false,
+"k": 0,
+"n": 1
+},
+"HEALTH|short|view": {
+"meaningful": false,
+"k": 0,
+"n": 1
+},
+"HOSPITALITY|intraday|book1": {
+"meaningful": false,
+"k": 4,
+"n": 6
+},
+"HOSPITALITY|intraday|book2": {
+"meaningful": false,
+"k": 5,
+"n": 8
+},
+"HOSPITALITY|intraday|view": {
+"meaningful": false,
+"k": 4,
+"n": 6
+},
+"HOSPITALITY|short|book1": {
+"meaningful": false,
+"k": 0,
+"n": 1
+},
+"HOSPITALITY|short|view": {
+"meaningful": false,
+"k": 0,
+"n": 1
+},
+"INFRA|intraday|book1": {
+"meaningful": false,
+"k": 2,
+"n": 7
+},
+"INFRA|intraday|book2": {
+"meaningful": false,
+"k": 3,
+"n": 8
+},
+"INFRA|intraday|view": {
+"meaningful": false,
+"k": 2,
+"n": 6
+},
+"INFRA|short|book1": {
+"meaningful": false,
+"k": 0,
+"n": 1
+},
+"INFRA|short|view": {
+"meaningful": false,
+"k": 0,
+"n": 1
+},
+"IT|intraday|book1": {
+"meaningful": false,
+"k": 1,
+"n": 3
+},
+"IT|intraday|book2": {
+"meaningful": false,
+"k": 5,
+"n": 8
+},
+"IT|intraday|view": {
+"meaningful": false,
+"k": 4,
+"n": 7
+},
+"IT|short|book1": {
+"meaningful": false,
+"k": 0,
+"n": 1
+},
+"IT|short|view": {
+"meaningful": false,
+"k": 0,
+"n": 1
+},
+"MEDIA|intraday|book1": {
+"meaningful": false,
+"k": 3,
+"n": 4
+},
+"MEDIA|intraday|book2": {
+"meaningful": false,
+"k": 3,
+"n": 8
+},
+"MEDIA|intraday|view": {
+"meaningful": false,
+"k": 3,
+"n": 7
+},
+"MEDIA|short|book1": {
+"meaningful": false,
+"k": 1,
+"n": 1
+},
+"MEDIA|short|view": {
+"meaningful": false,
+"k": 1,
+"n": 1
+},
+"METAL|intraday|book1": {
+"meaningful": false,
+"k": 2,
+"n": 7
+},
+"METAL|intraday|book2": {
+"meaningful": false,
+"k": 4,
+"n": 8
+},
+"METAL|intraday|view": {
+"meaningful": false,
+"k": 2,
+"n": 5
+},
+"METAL|short|book1": {
+"meaningful": false,
+"k": 0,
+"n": 1
+},
+"METAL|short|view": {
+"meaningful": false,
+"k": 0,
+"n": 1
+},
+"NATGAS|intraday|book1": {
+"meaningful": false,
+"k": 2,
+"n": 3
+},
+"NATGAS|intraday|book2": {
+"meaningful": false,
+"k": 0,
+"n": 4
+},
+"NATGAS|intraday|view": {
+"meaningful": false,
+"k": 0,
+"n": 2
+},
+"NATGAS|short|book1": {
+"meaningful": false,
+"k": 1,
+"n": 1
+},
+"NATGAS|short|view": {
+"meaningful": false,
+"k": 1,
+"n": 1
+},
+"NIFTY|intraday|book2": {
+"meaningful": false,
+"k": 6,
+"n": 8
+},
+"NIFTY|intraday|view": {
+"meaningful": false,
+"k": 6,
+"n": 8
+},
+"OILGAS|intraday|book1": {
+"meaningful": false,
+"k": 3,
+"n": 8
+},
+"OILGAS|intraday|book2": {
+"meaningful": false,
+"k": 2,
+"n": 8
+},
+"OILGAS|intraday|view": {
+"meaningful": false,
+"k": 1,
+"n": 5
+},
+"OILGAS|short|book1": {
+"meaningful": false,
+"k": 1,
+"n": 1
+},
+"OILGAS|short|view": {
+"meaningful": false,
+"k": 1,
+"n": 1
+},
+"PHARMA|intraday|book1": {
+"meaningful": false,
+"k": 2,
+"n": 5
+},
+"PHARMA|intraday|book2": {
+"meaningful": false,
+"k": 3,
+"n": 8
+},
+"PHARMA|intraday|view": {
+"meaningful": false,
+"k": 3,
+"n": 7
+},
+"POWER|intraday|book1": {
+"meaningful": false,
+"k": 1,
+"n": 6
+},
+"POWER|intraday|book2": {
+"meaningful": false,
+"k": 2,
+"n": 8
+},
+"POWER|intraday|view": {
+"meaningful": false,
+"k": 0,
+"n": 5
+},
+"POWER|short|book1": {
+"meaningful": false,
+"k": 0,
+"n": 1
+},
+"POWER|short|view": {
+"meaningful": false,
+"k": 0,
+"n": 1
+},
+"PSU|intraday|book1": {
+"meaningful": false,
+"k": 4,
+"n": 6
+},
+"PSU|intraday|book2": {
+"meaningful": false,
+"k": 4,
+"n": 8
+},
+"PSU|intraday|view": {
+"meaningful": false,
+"k": 3,
+"n": 5
+},
+"PUBLICATION|intraday|book1": {
+"meaningful": false,
+"k": 3,
+"n": 6
+},
+"PUBLICATION|intraday|book2": {
+"meaningful": false,
+"k": 3,
+"n": 8
+},
+"PUBLICATION|intraday|view": {
+"meaningful": false,
+"k": 2,
+"n": 6
+},
+"PUBLICATION|short|book1": {
+"meaningful": false,
+"k": 1,
+"n": 1
+},
+"PUBLICATION|short|view": {
+"meaningful": false,
+"k": 1,
+"n": 1
+},
+"REALTY|intraday|book1": {
+"meaningful": false,
+"k": 6,
+"n": 7
+},
+"REALTY|intraday|book2": {
+"meaningful": false,
+"k": 4,
+"n": 8
+},
+"REALTY|intraday|view": {
+"meaningful": false,
+"k": 4,
+"n": 6
+},
+"REALTY|short|book1": {
+"meaningful": false,
+"k": 0,
+"n": 1
+},
+"REALTY|short|view": {
+"meaningful": false,
+"k": 0,
+"n": 1
+},
+"SILVER|intraday|book1": {
+"meaningful": false,
+"k": 2,
+"n": 3
+},
+"SILVER|intraday|book2": {
+"meaningful": false,
+"k": 4,
+"n": 8
+},
+"SILVER|intraday|view": {
+"meaningful": false,
+"k": 3,
+"n": 7
+},
+"STEEL|intraday|book1": {
+"meaningful": false,
+"k": 3,
+"n": 7
+},
+"STEEL|intraday|book2": {
+"meaningful": false,
+"k": 4,
+"n": 8
+},
+"STEEL|intraday|view": {
+"meaningful": false,
+"k": 3,
+"n": 6
+},
+"TRAVEL|intraday|book1": {
+"meaningful": false,
+"k": 2,
+"n": 3
+},
+"TRAVEL|intraday|book2": {
+"meaningful": false,
+"k": 5,
+"n": 8
+},
+"TRAVEL|intraday|view": {
+"meaningful": false,
+"k": 5,
+"n": 7
+}
+}
