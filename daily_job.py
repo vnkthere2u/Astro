@@ -120,6 +120,11 @@ def evening():
         t = evening_text(d)
         if t and A.once(f'evening:{d}'):
             if not A.send(t): A.unmark(f'evening:{d}')
+    try:
+        import trends
+        trends.check(A.send)
+    except Exception as e:
+        print('trend check failed:', e)
     nxt = next_session(today + timedelta(days=1))
     log(nxt)
     outlook()
