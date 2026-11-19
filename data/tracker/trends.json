@@ -56,18 +56,18 @@
 },
 "CRUDE|intraday|book1": {
 "meaningful": false,
-"k": 1,
-"n": 4
+"k": 3,
+"n": 8
 },
 "CRUDE|intraday|book2": {
 "meaningful": false,
-"k": 3,
-"n": 3
+"k": 5,
+"n": 7
 },
 "CRUDE|intraday|view": {
 "meaningful": false,
-"k": 1,
-"n": 2
+"k": 2,
+"n": 4
 },
 "CRUDE|short|book1": {
 "meaningful": false,
