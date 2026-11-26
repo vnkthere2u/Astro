@@ -56,28 +56,28 @@
 },
 "CRUDE|intraday|book1": {
 "meaningful": false,
-"k": 3,
-"n": 8
+"k": 4,
+"n": 10
 },
 "CRUDE|intraday|book2": {
 "meaningful": false,
-"k": 5,
-"n": 7
+"k": 7,
+"n": 12
 },
 "CRUDE|intraday|view": {
 "meaningful": false,
-"k": 2,
-"n": 4
+"k": 3,
+"n": 7
 },
 "CRUDE|short|book1": {
 "meaningful": false,
 "k": 0,
-"n": 1
+"n": 2
 },
 "CRUDE|short|view": {
 "meaningful": false,
 "k": 0,
-"n": 1
+"n": 2
 },
 "FMCG|intraday|book1": {
 "meaningful": false,
