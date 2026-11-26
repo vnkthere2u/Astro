@@ -6,28 +6,28 @@
 },
 "AUTO|intraday|book2": {
 "meaningful": false,
-"k": 7,
-"n": 12
+"k": 8,
+"n": 13
 },
 "AUTO|intraday|view": {
 "meaningful": false,
-"k": 7,
-"n": 10
+"k": 8,
+"n": 11
 },
 "BANK|intraday|book1": {
 "meaningful": false,
-"k": 4,
-"n": 8
+"k": 5,
+"n": 9
 },
 "BANK|intraday|book2": {
 "meaningful": false,
-"k": 9,
-"n": 12
+"k": 10,
+"n": 13
 },
 "BANK|intraday|view": {
 "meaningful": false,
-"k": 7,
-"n": 9
+"k": 8,
+"n": 10
 },
 "BANK|short|book1": {
 "meaningful": false,
@@ -41,13 +41,13 @@
 },
 "CAPGOODS|intraday|book1": {
 "meaningful": false,
-"k": 2,
-"n": 9
+"k": 3,
+"n": 10
 },
 "CAPGOODS|intraday|book2": {
 "meaningful": false,
 "k": 6,
-"n": 12
+"n": 13
 },
 "CAPGOODS|intraday|view": {
 "meaningful": false,
@@ -81,18 +81,18 @@
 },
 "FMCG|intraday|book1": {
 "meaningful": false,
-"k": 5,
-"n": 9
+"k": 6,
+"n": 10
 },
 "FMCG|intraday|book2": {
 "meaningful": false,
-"k": 7,
-"n": 12
+"k": 8,
+"n": 13
 },
 "FMCG|intraday|view": {
 "meaningful": false,
-"k": 5,
-"n": 9
+"k": 6,
+"n": 10
 },
 "FMCG|short|book1": {
 "meaningful": false,
@@ -107,17 +107,17 @@
 "GEMS|intraday|book1": {
 "meaningful": false,
 "k": 3,
-"n": 10
+"n": 11
 },
 "GEMS|intraday|book2": {
 "meaningful": false,
 "k": 10,
-"n": 12
+"n": 13
 },
 "GEMS|intraday|view": {
 "meaningful": false,
 "k": 5,
-"n": 7
+"n": 8
 },
 "GEMS|short|book1": {
 "meaningful": false,
@@ -137,22 +137,22 @@
 "GOLD|intraday|book2": {
 "meaningful": false,
 "k": 7,
-"n": 11
+"n": 12
 },
 "GOLD|intraday|view": {
 "meaningful": false,
 "k": 7,
-"n": 10
+"n": 11
 },
 "HEALTH|intraday|book1": {
 "meaningful": false,
 "k": 5,
-"n": 9
+"n": 10
 },
 "HEALTH|intraday|book2": {
 "meaningful": false,
-"k": 6,
-"n": 12
+"k": 7,
+"n": 13
 },
 "HEALTH|intraday|view": {
 "meaningful": false,
@@ -172,17 +172,17 @@
 "HOSPITALITY|intraday|book1": {
 "meaningful": false,
 "k": 6,
-"n": 10
+"n": 11
 },
 "HOSPITALITY|intraday|book2": {
 "meaningful": false,
 "k": 8,
-"n": 12
+"n": 13
 },
 "HOSPITALITY|intraday|view": {
 "meaningful": false,
 "k": 6,
-"n": 9
+"n": 10
 },
 "HOSPITALITY|short|book1": {
 "meaningful": false,
@@ -196,13 +196,13 @@
 },
 "INFRA|intraday|book1": {
 "meaningful": false,
-"k": 4,
-"n": 11
+"k": 5,
+"n": 12
 },
 "INFRA|intraday|book2": {
 "meaningful": false,
 "k": 6,
-"n": 12
+"n": 13
 },
 "INFRA|intraday|view": {
 "meaningful": false,
@@ -227,12 +227,12 @@
 "IT|intraday|book2": {
 "meaningful": false,
 "k": 8,
-"n": 12
+"n": 13
 },
 "IT|intraday|view": {
 "meaningful": false,
 "k": 7,
-"n": 10
+"n": 11
 },
 "IT|short|book1": {
 "meaningful": false,
@@ -252,12 +252,12 @@
 "MEDIA|intraday|book2": {
 "meaningful": false,
 "k": 4,
-"n": 12
+"n": 13
 },
 "MEDIA|intraday|view": {
 "meaningful": false,
 "k": 4,
-"n": 11
+"n": 12
 },
 "MEDIA|short|book1": {
 "meaningful": false,
@@ -271,13 +271,13 @@
 },
 "METAL|intraday|book1": {
 "meaningful": false,
-"k": 4,
-"n": 10
+"k": 5,
+"n": 11
 },
 "METAL|intraday|book2": {
 "meaningful": false,
 "k": 7,
-"n": 12
+"n": 13
 },
 "METAL|intraday|view": {
 "meaningful": false,
@@ -296,48 +296,48 @@
 },
 "NATGAS|intraday|book1": {
 "meaningful": false,
-"k": 4,
-"n": 5
+"k": 5,
+"n": 8
 },
 "NATGAS|intraday|book2": {
 "meaningful": false,
-"k": 1,
-"n": 7
+"k": 2,
+"n": 12
 },
 "NATGAS|intraday|view": {
 "meaningful": false,
 "k": 1,
-"n": 4
+"n": 7
 },
 "NATGAS|short|book1": {
 "meaningful": false,
-"k": 1,
-"n": 1
+"k": 2,
+"n": 2
 },
 "NATGAS|short|view": {
 "meaningful": false,
-"k": 1,
-"n": 1
+"k": 2,
+"n": 2
 },
 "NIFTY|intraday|book2": {
 "meaningful": false,
-"k": 9,
-"n": 12
+"k": 10,
+"n": 13
 },
 "NIFTY|intraday|view": {
 "meaningful": false,
-"k": 9,
-"n": 12
+"k": 10,
+"n": 13
 },
 "OILGAS|intraday|book1": {
 "meaningful": false,
-"k": 5,
-"n": 12
+"k": 6,
+"n": 13
 },
 "OILGAS|intraday|book2": {
 "meaningful": false,
 "k": 5,
-"n": 12
+"n": 13
 },
 "OILGAS|intraday|view": {
 "meaningful": false,
@@ -357,12 +357,12 @@
 "PHARMA|intraday|book1": {
 "meaningful": false,
 "k": 4,
-"n": 9
+"n": 10
 },
 "PHARMA|intraday|book2": {
 "meaningful": false,
-"k": 6,
-"n": 12
+"k": 7,
+"n": 13
 },
 "PHARMA|intraday|view": {
 "meaningful": false,
@@ -371,13 +371,13 @@
 },
 "POWER|intraday|book1": {
 "meaningful": false,
-"k": 2,
-"n": 8
+"k": 3,
+"n": 9
 },
 "POWER|intraday|book2": {
 "meaningful": false,
 "k": 5,
-"n": 12
+"n": 13
 },
 "POWER|intraday|view": {
 "meaningful": false,
@@ -401,13 +401,13 @@
 },
 "PSU|intraday|book2": {
 "meaningful": false,
-"k": 7,
-"n": 12
+"k": 8,
+"n": 13
 },
 "PSU|intraday|view": {
 "meaningful": false,
-"k": 5,
-"n": 7
+"k": 6,
+"n": 8
 },
 "PUBLICATION|intraday|book1": {
 "meaningful": false,
@@ -417,32 +417,32 @@
 "PUBLICATION|intraday|book2": {
 "meaningful": false,
 "k": 4,
-"n": 12
+"n": 13
 },
 "PUBLICATION|intraday|view": {
 "meaningful": false,
 "k": 3,
-"n": 10
+"n": 11
 },
 "PUBLICATION|short|book1": {
 "meaningful": false,
 "k": 1,
-"n": 1
+"n": 2
 },
 "PUBLICATION|short|view": {
 "meaningful": false,
 "k": 1,
-"n": 1
+"n": 2
 },
 "REALTY|intraday|book1": {
 "meaningful": false,
-"k": 8,
-"n": 11
+"k": 9,
+"n": 12
 },
 "REALTY|intraday|book2": {
 "meaningful": false,
 "k": 7,
-"n": 12
+"n": 13
 },
 "REALTY|intraday|view": {
 "meaningful": false,
@@ -461,13 +461,13 @@
 },
 "SILVER|intraday|book1": {
 "meaningful": false,
-"k": 2,
-"n": 3
+"k": 3,
+"n": 4
 },
 "SILVER|intraday|book2": {
 "meaningful": false,
 "k": 7,
-"n": 12
+"n": 13
 },
 "SILVER|intraday|view": {
 "meaningful": false,
@@ -482,22 +482,22 @@
 "STEEL|intraday|book2": {
 "meaningful": false,
 "k": 7,
-"n": 12
+"n": 13
 },
 "STEEL|intraday|view": {
 "meaningful": false,
 "k": 4,
-"n": 7
+"n": 8
 },
 "TRAVEL|intraday|book1": {
 "meaningful": false,
-"k": 2,
-"n": 4
+"k": 3,
+"n": 5
 },
 "TRAVEL|intraday|book2": {
 "meaningful": false,
 "k": 8,
-"n": 12
+"n": 13
 },
 "TRAVEL|intraday|view": {
 "meaningful": false,
